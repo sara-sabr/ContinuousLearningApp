@@ -36,7 +36,11 @@ This application is using or will be using several different open source technol
 
 [PostgreSQL](https://www.postgresql.org/): In my opinion the best open source relational database out there. It has awesome features like full text search which allows the processing and indexing of textual documents in many different languages to allow for efficient search. 
 
+[Prisma](https://www.prisma.io/): Prisma provides an automated GraphQL layer on top of your databases. It allows for an efficient and type safe way to access your database.
+
 [NGINX](https://www.nginx.com/): A fast and efficient open source web server
+
+
 
 
 This list will probably grow as the proof of concept development continues ! 
