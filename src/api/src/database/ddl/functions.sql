@@ -88,7 +88,7 @@ $$ LANGUAGE plpgsql VOLATILE;
 
 CREATE OR REPLACE log_category_delete()
 RETURNS TRIGGER AS $$ 
-INSERT INTO logs (action_id, category) VALUES (
+	INSERT INTO logs (action_id, category) VALUES (
 		(SELECT id FROM actions WHERE action_name = 'DELETE_CATEGORY'),
 		OLD.title
 	);
