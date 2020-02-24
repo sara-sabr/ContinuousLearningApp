@@ -8,3 +8,89 @@ END;
 $$ LANGUAGE plpgsql STABLE;
 
 
+/* function that processes text fields into tsvector */
+CREATE OR REPLACE FUNCTION process_text()
+RETURNS TRIGGER AS $$
+BEGIN
+	IF OLD.title IS NULL OR NEW.language <> OLD.language OR NEW.title <> OLD.title OR NEW.description <> OLD.description THEN
+		IF NEW.language = 'en' THEN
+			NEW.ftx_data = to_tsvector('en', NEW.title || '  ' || coalesce(NEW.description, ''));
+		ELSEIF NEW.language = 'fr' THEN
+			NEW.ftx_data = to_tsvector('fr', NEW.title || '  ' || coalesce(NEW.description, ''));
+		END IF;
+	END IF;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql STABLE; 
+
+
+/* create link action logger */
+CREATE OR REPLACE FUNCTION log_link_create() 
+RETURNS TRIGGER AS $$ 
+BEGIN 
+	INSERT INTO logs (action_id, link_id) VALUES (
+		(SELECT id FROM actions WHERE action_name = 'CREATE_LINK'),
+		NEW.id
+	);
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
+
+/* update link action logger */
+CREATE OR REPLACE log_link_update()
+RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO logs (action_id, link_id ) VALUES (
+		(SELECT id FROM actions WHERE action_name = 'UPDATE_LINK'),
+		NEW.id
+	);
+	RETURNS NEW;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
+
+
+/*delete link action logger */
+CREATE OR REPLACE log_link_delete()
+RETURNS TRIGGER AS $$ 
+BEGIN 
+	INSERT INTO logs (action_id, link ) VALUES (
+		(SELECT id FROM actions WHERE action_name = 'DELETE_LINK'),
+		OLD.url 
+	);
+	RETURNS NEW;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
+
+
+CREATE OR REPLACE log_category_create()
+RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO logs (action_id, category_id ) VALUES (
+		(SELECT id FROM actions WHERE action_name = 'CREATE_CATEGORY'),
+		NEW.id
+	);
+	RETURNS NEW;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
+
+
+CREATE OR REPLACE log_category_update()
+RETURNS TRIGGER AS $$
+BEGIN 
+	INSERT INTO logs (action_id, category_id) VALUES (
+		(SELECT id FROM actions WHERE action_name = 'UPDATE_CATEGORY'),
+		NEW.id
+	);
+	RETURNS NEW;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
+
+
+CREATE OR REPLACE log_category_delete()
+RETURNS TRIGGER AS $$ 
+INSERT INTO logs (action_id, category) VALUES (
+		(SELECT id FROM actions WHERE action_name = 'DELETE_CATEGORY'),
+		OLD.title
+	);
+	RETURNS NEW;
+END;
