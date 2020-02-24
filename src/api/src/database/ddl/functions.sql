@@ -28,70 +28,76 @@ $$ LANGUAGE plpgsql STABLE;
 CREATE OR REPLACE FUNCTION log_link_create() 
 RETURNS TRIGGER AS $$ 
 BEGIN 
-	INSERT INTO logs (action_id, link_id) VALUES (
+	INSERT INTO logs (action_id, link_id, link) VALUES (
 		(SELECT id FROM actions WHERE action_name = 'CREATE_LINK'),
-		NEW.id
+		NEW.id,
+		NEW.url
 	);
 	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 
 /* update link action logger */
-CREATE OR REPLACE log_link_update()
+CREATE OR REPLACE FUNCTION log_link_update()
 RETURNS TRIGGER AS $$
 BEGIN
-	INSERT INTO logs (action_id, link_id ) VALUES (
+	INSERT INTO logs (action_id, link_id, link) VALUES (
 		(SELECT id FROM actions WHERE action_name = 'UPDATE_LINK'),
-		NEW.id
+		NEW.id,
+		NEW.url
 	);
-	RETURNS NEW;
+	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 
 
 /*delete link action logger */
-CREATE OR REPLACE log_link_delete()
+CREATE OR REPLACE FUNCTION log_link_delete()
 RETURNS TRIGGER AS $$ 
 BEGIN 
 	INSERT INTO logs (action_id, link ) VALUES (
 		(SELECT id FROM actions WHERE action_name = 'DELETE_LINK'),
 		OLD.url 
 	);
-	RETURNS NEW;
+	UPDATE logs SET link = OLD.url WHERE link_id = OLD.id; 
+	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 
 
-CREATE OR REPLACE log_category_create()
+CREATE OR REPLACE FUNCTION log_category_create()
 RETURNS TRIGGER AS $$
 BEGIN
-	INSERT INTO logs (action_id, category_id ) VALUES (
+	INSERT INTO logs (action_id, category_id, category ) VALUES (
 		(SELECT id FROM actions WHERE action_name = 'CREATE_CATEGORY'),
-		NEW.id
+		NEW.id,
+		NEW.title
 	);
-	RETURNS NEW;
+	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 
 
-CREATE OR REPLACE log_category_update()
+CREATE OR REPLACE FUNCTION log_category_update()
 RETURNS TRIGGER AS $$
 BEGIN 
-	INSERT INTO logs (action_id, category_id) VALUES (
+	INSERT INTO logs (action_id, category_id, category) VALUES (
 		(SELECT id FROM actions WHERE action_name = 'UPDATE_CATEGORY'),
-		NEW.id
+		NEW.id,
+		NEW.title
 	);
-	RETURNS NEW;
+	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql VOLATILE;
 
 
-CREATE OR REPLACE log_category_delete()
-RETURNS TRIGGER AS $$ 
+CREATE OR REPLACE FUNCTION log_category_delete()
+RETURNS TRIGGER AS $$
+BEGIN
 	INSERT INTO logs (action_id, category) VALUES (
 		(SELECT id FROM actions WHERE action_name = 'DELETE_CATEGORY'),
 		OLD.title
 	);
-	RETURNS NEW;
+	RETURN NEW;
 END;
 $$ LANGUAGE plpgsql VOLATILE;
