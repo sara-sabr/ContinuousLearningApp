@@ -17,4 +17,4 @@ CREATE TRIGGER log_link_delete AFTER DELETE ON links FOR EACH ROW EXECUTE PROCED
 /* logging trigger for categories table */
 CREATE TRIGGER log_category_create AFTER INSERT ON categories FOR EACH ROW EXECUTE PROCEDURE log_category_create();
 CREATE TRIGGER log_category_update AFTER UPDATE ON categories FOR EACH ROW EXECUTE PROCEDURE log_category_update();
-CREATE TRIGGER log_category_delete AFTER DELETE ON categories FOR EACH ROW EXECUTE PROCEDURE log_category_update(); 
+CREATE TRIGGER log_category_delete AFTER DELETE ON categories FOR EACH ROW EXECUTE PROCEDURE log_category_delete(); 
