@@ -65,6 +65,7 @@ describe("Database Schema Tests", () => {
         })
         
         it('should fail on not including language in insert', async () =>{
+            let errorMessage:string = ""
             try {
                 await client.query(
                     'INSERT INTO links (url, title ) VALUES ($1::text, $2::text)',
@@ -78,13 +79,15 @@ describe("Database Schema Tests", () => {
                 )
             }
             catch(e){
-                expect(e.stack).toMatch(/error: null value in column "language" violates not-null constraint/)
+                errorMessage = e.stack
             }
+            expect(errorMessage).toMatch(/error: null value in column "language" violates not-null constraint/)
             
         }
         )
 
         it('should fail on not including url in insert', async () => {
+            let errorMessage:string = ""
             try{
                 await client.query(
                     "INSERT INTO links(title, language ) VALUES ($1::text, $2::text)",
@@ -93,17 +96,15 @@ describe("Database Schema Tests", () => {
                         "en"
                     ]
                 )
-                throw new Error(
-
-                    "row successfully inserted when it was supposed to throw an error due to no url column"
-                )
             }
             catch(e){
-                expect(e.stack).toMatch(/error: null value in column "url" violates not-null constraint/)
+                errorMessage = e.stack
             }
+            expect(errorMessage).toMatch(/error: null value in column "url" violates not-null constraint/)
         })
 
         it('should fail on not including title in insert', async () => {
+            let errorMessage:string = ""
             try{
                 await client.query(
                     "INSERT INTO links(url, language ) VALUES ($1::text, $2::text)",
@@ -112,14 +113,11 @@ describe("Database Schema Tests", () => {
                         "en"
                     ]
                 )
-                throw new Error(
-
-                    "row successfully inserted when it was supposed to throw an error due to no title column"
-                )
             }
             catch(e){
-                expect(e.stack).toMatch(/error: null value in column "title" violates not-null constraint/)
+                errorMessage = e.stack
             }
+            expect(errorMessage).toMatch(/error: null value in column "title" violates not-null constraint/)
         })
 
         it('should allow "en" and "fr" values for language column', async () => {
@@ -132,6 +130,7 @@ describe("Database Schema Tests", () => {
 
         it ('should allow no other values for language column', async () => {
             let randValue = Math.random().toString(36).slice(7)
+            let errorMessage:string = ""
             try {
                 await client.query(
                     " INSERT INTO links(url, title, language) VALUES ( 'https://test.com', 'test', $1::text ) ",
@@ -139,12 +138,41 @@ describe("Database Schema Tests", () => {
                         randValue
                     ]
                 )
-                throw new Error(
-                    "row successfully inserted when it was supposed to throw an error due to language not being an acceptable value"
+            }catch(e){
+                errorMessage = e.stack
+            }
+            expect(errorMessage).toMatch(/error: new row for relation "links" violates check constraint "language_english_or_french"/)
+        })
+
+        it('url field should be unique', async () => {
+            let errorMessage:string = ""
+            try {
+                await client.query(
+                    `
+                    INSERT INTO links (url, title, language ) VALUES ( 'https://same-url.com', 'same-url1', 'en');
+                    INSERT INTO links (url, title, language ) VALUES ( 'https://same-url.com', 'same-url2', 'en');
+                    `
                 )
             }catch(e){
-                expect(e.stack).toMatch(/error: new row for relation "links" violates check constraint "language_english_or_french"/)
+                errorMessage = e.stack
             }
+            expect(errorMessage).toMatch(/error: duplicate key value violates unique constraint "links_url_key"/)
+        })
+
+        it('title field should be unique', async () => {
+            let errorMessage:string = ""
+            try {
+                await client.query(
+                    `
+                    INSERT INTO links ( url, title, language ) VALUES ('https://test1.com', 'test', 'en');
+                    INSERT INTO links ( url, title, language ) VALUES ('https://test2.com', 'test', 'en');
+                    `
+                )
+            }
+            catch(e){
+                errorMessage = e.stack
+            }
+            expect(errorMessage).toMatch(/error: duplicate key value violates unique constraint "links_title_key"/)
         })
         
     })
