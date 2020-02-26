@@ -5,9 +5,11 @@ import * as path from "path"
 
 export class DatabaseOperations{
     private client: Client
+    private configs: ClientConfig
     constructor( configs: ClientConfig){
+        this.configs = configs
         this.client = new Client(
-             configs
+            configs
         )
     }
 
@@ -65,7 +67,7 @@ export class DatabaseOperations{
             await this.client.query({
                 text: ddl_string
             })
-            await this.client.end()
+            await this.endClient()
         }
         catch(err){
             console.error("Failed to create schema with the following ddl \n " + ddl_string)
@@ -83,12 +85,21 @@ export class DatabaseOperations{
                 CREATE SCHEMA public;
                 `
             })
-            await this.client.end()
+            await this.endClient()
         }
         catch(err){
             await this.client.end()
             throw err
         }
+    }
+
+    getClient(): Client{
+        return this.client
+    }
+
+    async endClient(){
+        await this.client.end()
+        this.client = new Client(this.configs)
     }
 
 }
