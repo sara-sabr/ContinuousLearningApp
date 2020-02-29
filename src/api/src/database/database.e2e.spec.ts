@@ -1,5 +1,5 @@
 import { DatabaseOperations } from "./db";
-import { ClientConfig, Client } from "pg"
+import { ClientConfig, Client, PoolClient } from "pg"
 import * as path from "path"
 import { async } from "rxjs/internal/scheduler/async";
 import { AssertionError } from "assert";
@@ -20,14 +20,14 @@ describe("Database Schema Tests", () => {
     const db_ops: DatabaseOperations = new DatabaseOperations(testDatabaseConfiguration)
     const ddl_path = path.join(__dirname.replace(__filename, ""), "ddl")
     const ddl = DatabaseOperations.load_ddl(ddl_path)
-    let client: Client
+    let client: Client | PoolClient
     
     beforeEach(async () => {
         await db_ops.destroyDatabaseSchema()
         
         try{
             await db_ops.createDatabaseSchema(ddl)
-            client = db_ops.getClient()
+            client = await db_ops.getClient()
         }
         catch(error){
             console.log("Failed to initiate test: Could not create schema")

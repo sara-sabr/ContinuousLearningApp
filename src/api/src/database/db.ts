@@ -1,16 +1,31 @@
-import { Client, ClientConfig } from "pg";
+import { Pool, Client, ClientConfig, PoolConfig, PoolClient, QueryResult } from "pg";
 import * as fs from "fs";
 import * as path from "path" 
+import { config } from "rxjs";
 
 
 export class DatabaseOperations{
-    private client: Client
+    private client: Client 
+    private pool: Pool
     private configs: ClientConfig
-    constructor( configs: ClientConfig){
+    private usePool: boolean
+    constructor( configs: ClientConfig, usePool: boolean = false){
         this.configs = configs
-        this.client = new Client(
-            configs
-        )
+        if (usePool){
+            let poolConfigs: PoolConfig = this.configs
+            poolConfigs["max"] = 20
+            poolConfigs["min"] = 4
+            poolConfigs["idleTimeoutMillis"] = 10000
+            poolConfigs["connectionTimeoutMillis"] = 0
+            this.pool = new Pool(
+                poolConfigs
+            )
+        }
+        else {
+            this.client = new Client(
+                configs
+            )
+        }
     }
 
     /**
@@ -62,12 +77,20 @@ export class DatabaseOperations{
     }
 
     async createDatabaseSchema(ddl_string: string){
-        await this.client.connect()
+        let client = await this.getClient()
+        if ( ! this.usePool){
+            await client.connect()
+        }
         try {
-            await this.client.query({
+            await client.query({
                 text: ddl_string
             })
-            await this.endClient()
+            if ( ! this.usePool){
+                await this.endClient()
+            }
+            else {
+                await this.endClient(client as PoolClient)
+            }
         }
         catch(err){
             console.error("Failed to create schema with the following ddl \n " + ddl_string)
@@ -76,30 +99,88 @@ export class DatabaseOperations{
     }
 
     async destroyDatabaseSchema(){
-        await this.client.connect()
-
+        let client = await this.getClient()
+        if ( ! this.usePool){
+            await client.connect()
+        }
         try {
-            await this.client.query({
+            await client.query({
                 text: `
                 DROP SCHEMA public CASCADE;
                 CREATE SCHEMA public;
                 `
             })
-            await this.endClient()
+            if ( ! this.usePool){
+                await this.endClient()
+            }
+            else {
+                await this.endClient(client as PoolClient)
+            }
         }
         catch(err){
-            await this.client.end()
+            if ( ! this.usePool){
+                await this.endClient()
+            }
+            else {
+                await this.endClient(client as PoolClient)
+            }
             throw err
         }
     }
 
-    getClient(): Client{
+    async query(query: string, data?: Array<any> ): Promise<QueryResult<any>>{
+        let  client = await this.getClient()
+        if ( ! this.usePool ){
+            await client.connect()
+        }
+        try{
+            let results: QueryResult<any>
+            if (data){
+                results = await client.query(
+                    query,
+                    data
+                )
+            }
+            else{
+                results = await client.query(
+                    query
+                )
+            }
+
+            if( ! this.usePool ){
+                await this.endClient()
+            }
+            else {
+                await this.endClient(client as PoolClient)
+            }
+            return results
+        }catch(err){
+            if( ! this.usePool ){
+                await this.endClient()
+            }
+            else {
+                await this.endClient(client as PoolClient)
+            }
+            throw err
+        }
+    }
+
+    async getClient(): Promise<Client | PoolClient>{
+        if (this.usePool){
+            let connectedClient = await this.pool.connect()
+            return connectedClient
+        }
         return this.client
     }
 
-    async endClient(){
-        await this.client.end()
-        this.client = new Client(this.configs)
+    async endClient(client?: PoolClient ){
+        if (this.usePool){
+            client.release()
+        }
+        else{
+            await this.client.end()
+            this.client = new Client(this.configs)
+        }
     }
 
 }
