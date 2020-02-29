@@ -388,4 +388,5 @@ Temporary Items
 =======
 # Local
 .env
+src/**/*.production.json
 dist
