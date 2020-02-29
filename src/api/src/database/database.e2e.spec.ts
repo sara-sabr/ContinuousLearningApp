@@ -40,7 +40,33 @@ describe("Database Schema Tests", () => {
         await db_ops.endClient()
         await db_ops.destroyDatabaseSchema()
     })
-    
+    describe("actions table tests", () => {
+        it ("has default actions on db creation", async () =>{
+            let results = await client.query(
+                "SELECT * FROM actions"
+            )
+
+            expect(results.rowCount).toBe(8)
+            let actions_array = results.rows.map((row, index) => {
+                return row["action_name"]
+            })
+
+            let actions = [
+                "CREATE_LINK",
+                "UPDATE_LINK",
+                "DELETE_LINK",
+                "READ_LINK",
+                "CREATE_CATEGORY",
+                "UPDATE_CATEGORY",
+                "DELETE_CATEGORY",
+                "READ_CATEGORY"
+            ]
+
+            for (let i in actions ) {
+                expect(actions_array.indexOf(actions[i])).toBeGreaterThan(-1)
+            }
+        })
+    })
     describe("links table tests", () => {
         describe("fields tests", () => {
             it('should insert valid data with url, language and title', async () => {
@@ -597,7 +623,40 @@ describe("Database Schema Tests", () => {
 
                 expect(results.rows[0]["ftx_data"]).toBe(manual_results.rows[0]["to_tsvector"])
             })
+        })
+    })
 
+    describe("many to many relationship between links and categories", () => {
+        it("create a relationship through links_categories_mapper", async () => {
+            await client.query(
+                `INSERT INTO links ( url, title, language ) VALUES ( 'https://testlink.com', 'test link' ,'en' );
+                 INSERT INTO categories ( title, language ) VALUES ( 'test category', 'en' );
+                 INSERT INTO links_categories_mapper ( link_id, category_id ) VALUES ( 1, 1 );
+                `
+            )
+        })
+
+        it("deletes a relationship when link is deleted", async () => {
+            await client.query(
+                `INSERT INTO links ( url, title, language ) VALUES ( 'https://testlink.com', 'test link' ,'en' );
+                 INSERT INTO categories ( title, language ) VALUES ( 'test category', 'en' );
+                 INSERT INTO links_categories_mapper ( link_id, category_id ) VALUES ( 1, 1 );
+                `
+            )
+
+            let relationship_results = await client.query(
+                "SELECT * FROM links_categories_mapper"
+            )
+            expect(relationship_results.rowCount).toBe(1)
+
+            await client.query(
+                "DELETE FROM links WHERE id = 1"
+            )
+
+            relationship_results = await client.query(
+                "SELECT * FROM links_categories_mapper"
+            )
+            expect(relationship_results.rowCount).toBe(0)
         })
     })
 })
