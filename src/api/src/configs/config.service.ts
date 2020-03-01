@@ -1,18 +1,7 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Optional } from "@nestjs/common";
 import * as fs from "fs"
 import * as path from "path"
-import { type } from "os";
-import e = require("express");
-
-export interface ConfigurationsInterface{
-    databaseName?: string,
-    databaseHost?: string,
-    databasePort?: number,
-    databasePassword?: string,
-    databaseUser?: string,
-    applicationURL?: string,
-    applicationPort?: number
-}
+import {ConfigurationsInterface} from "../interfaces/configurations.interface"
 
 
 @Injectable()
@@ -71,9 +60,9 @@ export default class ConfigurationService {
     }
 
     constructor(
-        environment:string = process.env.NODE_ENV,
-        pathToDevelopmentJSON:string = path.join(__dirname.replace(__filename, ""), "config.development.json"),
-        pathToProductionJSON:string = path.join(__dirname.replace(__filename, ""), "config.production.json")
+       @Optional() environment:string = process.env.NODE_ENV,
+       @Optional() pathToDevelopmentJSON:string = path.join(__dirname.replace(__filename, ""), "config.development.json"),
+       @Optional() pathToProductionJSON:string = path.join(__dirname.replace(__filename, ""), "config.production.json")
     ){
         environment = environment || "production"
         this.environment = environment
@@ -82,27 +71,39 @@ export default class ConfigurationService {
 
         if (environment === "development"){
             if (fs.existsSync(this.pathToDevelopmentJSON)){
-                this.configurationFile = JSON.parse(
-                    fs.readFileSync(
-                        pathToDevelopmentJSON,
-                        {
-                            encoding: "utf8"
-                        }
+                try{
+                    this.configurationFile = JSON.parse(
+                        fs.readFileSync(
+                            pathToDevelopmentJSON,
+                            {
+                                encoding: "utf8"
+                            }
+                        )
                     )
-                )
+                }
+                catch(e){
+                    this.configurationFile = {}
+                }
             }
         }
 
         else if (environment === "production"){
             if (fs.existsSync(this.pathToProductionJSON)){
-                this.configurationFile = JSON.parse(
-                    fs.readFileSync(
-                        pathToProductionJSON,
-                        {
-                            encoding: "utf8"
-                        }
-                    )
-                )
+                try{
+                    this.configurationFile = JSON.parse(
+                        fs.readFileSync(
+                            pathToProductionJSON,
+                            {
+                                encoding: "utf8"
+                            }
+                        )
+                    ) 
+                }
+                catch(e){
+                    console.error("failed to parse production configuration file")
+                    throw e
+                }
+                
             }
         }
 

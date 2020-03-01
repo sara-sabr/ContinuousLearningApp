@@ -1,7 +1,6 @@
 import { Pool, Client, ClientConfig, PoolConfig, PoolClient, QueryResult } from "pg";
 import * as fs from "fs";
 import * as path from "path" 
-import { config } from "rxjs";
 
 
 export class DatabaseOperations{
@@ -11,6 +10,7 @@ export class DatabaseOperations{
     private usePool: boolean
     constructor( configs: ClientConfig, usePool: boolean = false){
         this.configs = configs
+        this.usePool = usePool
         if (usePool){
             let poolConfigs: PoolConfig = this.configs
             poolConfigs["max"] = 20
@@ -20,6 +20,7 @@ export class DatabaseOperations{
             this.pool = new Pool(
                 poolConfigs
             )
+        
         }
         else {
             this.client = new Client(
@@ -181,6 +182,18 @@ export class DatabaseOperations{
             await this.client.end()
             this.client = new Client(this.configs)
         }
+    }
+
+    async endPool(){
+        await this.pool.end()    
+    }
+
+    getConfigs():ClientConfig{
+        return this.configs
+    }
+
+    usingPool():boolean{
+        return this.usePool
     }
 
 }

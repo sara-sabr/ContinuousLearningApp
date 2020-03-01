@@ -1,7 +1,8 @@
 
 import * as path from "path";
 import * as fs from "fs"
-import ConfigurationService, {ConfigurationsInterface} from "./config.service"
+import ConfigurationService from "./config.service"
+import { ConfigurationsInterface } from "../interfaces/configurations.interface"
 
 
 

@@ -1,8 +1,10 @@
 import { DatabaseOperations } from "./db";
 import { ClientConfig, Client, PoolClient } from "pg"
 import * as path from "path"
-import { async } from "rxjs/internal/scheduler/async";
-import { AssertionError } from "assert";
+import * as dotenv from "dotenv"
+
+dotenv.config()
+
 
 describe("Database Schema Tests", () => {
     const testDatabaseName = process.env.API_TEST_DATABASE_NAME || "continuous_learning_app_test_db"
