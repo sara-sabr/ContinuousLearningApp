@@ -7,24 +7,47 @@ export class DatabaseOperations{
     private client: Client 
     private pool: Pool
     private configs: ClientConfig
+    private poolConfigs: PoolConfig
     private usePool: boolean
     constructor( configs: ClientConfig, usePool: boolean = false){
         this.configs = configs
         this.usePool = usePool
         if (usePool){
-            let poolConfigs: PoolConfig = this.configs
-            poolConfigs["max"] = 20
-            poolConfigs["min"] = 4
-            poolConfigs["idleTimeoutMillis"] = 10000
-            poolConfigs["connectionTimeoutMillis"] = 0
+            this.poolConfigs = this.configs
+            this.poolConfigs["max"] = 20
+            this.poolConfigs["min"] = 4
+            this.poolConfigs["idleTimeoutMillis"] = 10000
+            this.poolConfigs["connectionTimeoutMillis"] = 0
             this.pool = new Pool(
-                poolConfigs
+                this.poolConfigs
+            )
+
+            // attempt to connect to db 
+            this.getClient().then(
+                (client) => {
+                    this.endClient(client as PoolClient).then(
+                        () => {
+                            this.endPool().then(
+                                () => {
+                                    this.createPool()
+                                }
+                            )
+                        }
+                    )
+                }
             )
         
         }
         else {
             this.client = new Client(
                 configs
+            )
+
+            //attempt to connect to db
+            this.client.connect().then(
+                () => {
+                    this.endClient()
+                }
             )
         }
     }
@@ -185,7 +208,13 @@ export class DatabaseOperations{
     }
 
     async endPool(){
-        await this.pool.end()    
+        await this.pool.end() 
+    }
+
+    createPool(){
+        this.pool = new Pool(
+            this.poolConfigs
+        )
     }
 
     getConfigs():ClientConfig{
