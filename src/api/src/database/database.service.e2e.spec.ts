@@ -147,6 +147,18 @@ describe("database service tests", () => {
                 expect(errorMessage.length).toBeGreaterThan(0)
             })
 
+            it("read link by id ", async () => {
+                await db.query(
+                    `
+                    INSERT INTO links ( url, title, language )  VALUES ( 'http://test1.com', 'test site 1', 'en' );
+                    INSERT INTO links ( url, title, language )  VALUES ( 'http://test2.com', 'test site 2', 'en' );
+                    `
+                )
+
+                // complete test case 
+                
+            } )
+
         })
         afterEach(async () => {
             await db.destroyDatabaseSchema()

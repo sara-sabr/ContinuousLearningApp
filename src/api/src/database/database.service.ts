@@ -1,5 +1,5 @@
 
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotImplementedException } from "@nestjs/common";
 import ConfigurationService from "../configs/config.service"
 import { DatabaseOperations } from "./db";
 import {ClientConfig } from "pg";
@@ -52,4 +52,14 @@ export default class DatabaseService{
 
         return results.rows[0]["id"]
     }
+
+    async readLinkById(filter: {
+        id: number,
+        limit?: number,
+        offset?: number,
+        orderBy?: string 
+    }){
+     throw new NotImplementedException()   
+    }
+
 }
