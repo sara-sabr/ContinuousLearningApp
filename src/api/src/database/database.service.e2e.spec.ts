@@ -7,8 +7,7 @@ import * as path from "path"
 import { ClientConfig } from "pg"
 import * as dotenv from "dotenv"
 import {Action, Log, Link, Category } from "../interfaces/data"
-import { link } from "fs"
-import { async } from "rxjs/internal/scheduler/async"
+import { DatabaseError, NoDataFound } from "../utils/errors"
 
 dotenv.config()
 jest.mock("../configs/config.service")
@@ -137,27 +136,61 @@ describe("database service tests", () => {
                     title: "This is a test link",
                     language: "some invalid language"
                 }
-                let errorMessage:string = ""
                 try{
                     await databaseService.createLink(linkData)
+                    throw new Error("error should have been thrown")
                 }catch(e){
-                    errorMessage = e.message
+                    expect(e).toBeInstanceOf(DatabaseError)
+                    expect(e.message.length).toBeGreaterThan(0)
                 }
-
-                expect(errorMessage.length).toBeGreaterThan(0)
             })
 
             it("read link by id ", async () => {
+                let result = await db.query(
+                    `
+                    INSERT INTO links ( url, title, language )  VALUES ( 'http://test1.com', 'test site 1', 'en' ) RETURNING created_on;
+                    `
+                )
+
                 await db.query(
                     `
-                    INSERT INTO links ( url, title, language )  VALUES ( 'http://test1.com', 'test site 1', 'en' );
                     INSERT INTO links ( url, title, language )  VALUES ( 'http://test2.com', 'test site 2', 'en' );
                     `
                 )
 
-                // complete test case 
+
+                let results = await databaseService.readLinkById(1)
+        
+                expect(results.id).toBe(1)
+                expect(results.url).toBe("http://test1.com")
+                expect(results.title).toBe("test site 1")
+                expect(results.language).toBe("en")
+                expect(results.createdOn.toISOString()).toBe(result.rows[0]["created_on"].toISOString())
                 
             } )
+
+            it("throws DatabaseError on read error in read link by id", async () => {
+                spiedOnQuery.mockImplementationOnce( (...args ) => {
+                    throw new Error("Some database error that occured")
+                })
+
+                try{
+                    await databaseService.readLinkById(1)
+                    throw new Error("error should have been thrown")
+                }catch(e){
+                    expect(e).toBeInstanceOf(DatabaseError)
+                    expect(e.message).toBe("Some database error that occured")
+                }
+            } )
+
+            it("throws NoDataFound when there is no rows for read link by id", async () => {
+                try{
+                    await databaseService.readLinkById(1)
+                }catch(e){
+                    expect(e).toBeInstanceOf(NoDataFound)
+                    expect(e.message).toBe("No links found for id 1")
+                }
+            })
 
         })
         afterEach(async () => {
