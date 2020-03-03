@@ -2,7 +2,7 @@
 import { Injectable, NotImplementedException } from "@nestjs/common";
 import ConfigurationService from "../configs/config.service"
 import { DatabaseOperations } from "./db";
-import {ClientConfig, QueryResult } from "pg";
+import {ClientConfig, QueryResult, QueryResultRow } from "pg";
 import {Link, Category, Action, Log } from "../interfaces/data"
 import {DatabaseError, NoDataFound} from "../utils/errors"
 
@@ -79,18 +79,90 @@ export default class DatabaseService{
             )
         }
 
-        return {
-            id: result.rows[0]["id"],
-            url: result.rows[0]["url"],
-            language: result.rows[0]["language"],
-            title: result.rows[0]["title"],
-            description: result.rows[0]["description"],
-            imageLink: result.rows[0]["image_link"],
-            createdOn: result.rows[0]["created_on"],
-            updatedOn: result.rows[0]["updated_on"]
-        }
+        return this.parseRowIntoLink(result.rows[0])
         
 
+    }
+
+    async readLinkByURL(url: string): Promise<Link>{
+        let result: QueryResult
+        try{
+            result = await this.db.query(
+                "SELECT * FROM links WHERE url = $1::text",
+                [
+                    url
+                ]
+            )
+        }catch(e){
+            throw new DatabaseError(e.message)
+        }
+
+        if (result.rowCount === 0){
+            throw new NoDataFound(
+                `No links found for url ${url}`
+            )
+        }
+
+        return this.parseRowIntoLink(result.rows[0])
+    }
+
+    async readLinks(options?: {
+        order?: string;
+        limit?: number;
+        offset?: number
+    }): Promise<Link[]>{
+
+        if (options && options["order"] && options["order"] !== "desc" && options["order"] !== "asc"){
+            throw new Error(
+                "order must have value of either asc or desc"
+            )
+        }
+
+        let result: QueryResult
+        let links: Link[] = []
+        try{
+            let query: string
+            if (options && options["order"] && options["order"] === "desc"){
+                query = "SELECT * FROM links ORDER BY created_on DESC"
+            }
+            else{
+                query = "SELECT * FROM links ORDER BY created_on ASC"  
+            }
+
+            if (options && options["limit"]){
+                query += ` LIMIT ${options["limit"]}::integer`
+            }
+
+            if (options && options["offset"]){
+                query += ` OFFSET ${options["offset"]}::integer`
+            }
+
+            result = await this.db.query( query )
+        }catch(e){
+            throw new DatabaseError(e.message)
+        }
+
+        if (result.rowCount > 0){
+            for (let row in result.rows){
+                let link = this.parseRowIntoLink(result.rows[row])
+                links.push(link)
+            }
+
+        }
+        return links
+    }
+
+    private parseRowIntoLink(data:QueryResultRow): Link {
+        return{
+            id: data["id"],
+            url: data["url"],
+            language: data["language"],
+            title: data["title"],
+            description: data["description"],
+            imageLink: data["image_link"],
+            createdOn: data["created_on"],
+            updatedOn: data["updated_on"]
+        }
     }
 
 }
