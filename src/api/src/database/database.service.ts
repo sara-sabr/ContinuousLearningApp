@@ -156,39 +156,79 @@ export default class DatabaseService{
         id: number, 
         updates : Pick<Partial<Link>, 'title' | 'description' | 'imageLink' | 'language'>
     ): Promise<Link>{
+        
+        return this.updateLinkByField(
+            "id", id, "integer", updates
+        )
+    }
+
+    async updateLinkByURL(
+        url: string,
+        updates: Pick<Partial<Link>, 'title' | 'description' | 'imageLink' | 'language'>
+    ): Promise<Link> {
+        return this.updateLinkByField(
+            "url", url, "text", updates
+        )
+    }
+
+
+    private async updateLinkByField(
+        field: string,
+        fieldValue: any, 
+        type: string, 
+        updates: Pick<Partial<Link>, 'title' | 'description' | 'imageLink' | 'language'>
+    ): Promise<Link> {
+        let result: QueryResult
         try {
             let query = "UPDATE links SET "
-            
+            let prevExists = false
             if (updates.title){
-                query += `title = '${updates.title}'::text, `
+                query += `title = '${updates.title}'::text`
+                prevExists = true
             }
             if(updates.description){
-                query += `description = '${updates.description}'::text, `
+                if (prevExists) {
+                    query += ", "
+                }
+                query += `description = '${updates.description}'::text`
+                prevExists = true
             }
             if (updates.imageLink){
-                query += `image_link = '${updates.imageLink}'::text, `
+                if (prevExists){
+                    query += ", "
+                }
+                query += `image_link = '${updates.imageLink}'::text`
+                prevExists = true
             } 
             if (updates.language){
-                query += `language = '${updates.language}'::text `
+                if (prevExists){
+                    query += ", "
+                }
+                query += `language = '${updates.language}'::text`
+                prevExists = true
             }
 
-            query += "WHERE id = $1::integer RETURNING *"
-
-            let result = await this.db.query(
+            query += ` WHERE  ${field}= $1::${type} RETURNING *`
+            console.log(query)
+            result = await this.db.query(
                 query,
                 [
-                    id
+                    fieldValue
                 ]
             )
-            
-            if (result.rowCount > 0 ){
-                return this.parseRowIntoLink(
-                    result.rows[0]
-                )
-            }
         }catch(e){
+            throw new DatabaseError(e.message)
             
         }
+        if (!result || result.rowCount === 0 ){
+            throw new NoDataFound(
+                `link cannot be found for ${field} ${fieldValue}`
+            )
+        }
+        return this.parseRowIntoLink(
+            result.rows[0]
+        )
+
     }
 
     private parseRowIntoLink(data:QueryResultRow): Link {

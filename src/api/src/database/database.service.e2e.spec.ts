@@ -487,9 +487,107 @@ describe("database service tests", () => {
                     dbResult.rows[0]["updated_on"].toISOString()
                 )
             })
+            it("throws NoDataFound when the row does not exist for update by id", async () => {
+                try{
+                    await databaseService.updateLinkById(
+                        1,
+                        {
+                            title: "some title"
+                        }
+                    )
+                    throw new Error("NoDataFound error should have been thrown")
+                }catch(e){
+                    expect(e).toBeInstanceOf(NoDataFound)
+                    expect(e.message).toBe(
+                        "link cannot be found for id 1"
+                    )
+                }
+            })
 
+            it ("throws DatabaseError on update error for update by id", async () => {
+                spiedOnQuery.mockImplementationOnce((...args) => {
+                    throw new Error("an error is thrown by db client")
+                })
+                try {
+                    await databaseService.updateLinkById(1, {
+                        title: "hello"
+                    })
+                    throw new Error("DatabaseError should have been thrown")
+                }catch(e){
+                    expect(e).toBeInstanceOf(DatabaseError)
+                    expect(e.message).toBe("an error is thrown by db client")
+                }
+                spiedOnQuery.mockRestore()
+            })
 
+            it("updates links by url", async () => {
+                await db.query(
+                    "INSERT INTO links (url, language, title) VALUES " +
+                    "( 'http://test.com', 'en', 'test site' ) "
+                )
+
+                await db.query(
+                    "INSERT INTO links (url, language, title ) VALUES " +
+                    "( 'http://test2.com', 'en', 'test site 2' )"
+                )
+
+                let result = await databaseService.updateLinkByURL(
+                    "http://test2.com", 
+                    {
+                        title: "This is a new title",
+                        description: "This is a new description",
+                        imageLink: "This is a new image link",
+                        language: "fr"
+                    }
+                )
+
+                let dbResult = await db.query("SELECT * FROM links WHERE id = 2")
+
+                expect(result.id).toBe(dbResult.rows[0]["id"])
+                expect(result.url).toBe(dbResult.rows[0]["url"])
+                expect(result.title).toBe(dbResult.rows[0]["title"])
+                expect(result.description).toBe(dbResult.rows[0]["description"])
+                expect(result.language).toBe(dbResult.rows[0]["language"])
+                expect(result.updatedOn.toISOString()).toBe(
+                    dbResult.rows[0]["updated_on"].toISOString()
+                )
+
+            })
+
+            it("throws NoDataFound when the row does not exist for update by url", async () => {
+                try{
+                    await databaseService.updateLinkByURL(
+                        "https://somelinkthatdoesntexist",
+                        {
+                            title: "some title"
+                        }
+                    )
+                    throw new Error("NoDataFound error should have been thrown")
+                }catch(e){
+                    expect(e).toBeInstanceOf(NoDataFound)
+                    expect(e.message).toBe(
+                        "link cannot be found for url https://somelinkthatdoesntexist"
+                    )
+                }
+            })
+
+            it ("throws DatabaseError on update error for update by id", async () => {
+                spiedOnQuery.mockImplementationOnce((...args) => {
+                    throw new Error("an error is thrown by db client")
+                })
+                try {
+                    await databaseService.updateLinkByURL("https://someurl", {
+                        title: "hello"
+                    })
+                    throw new Error("DatabaseError should have been thrown")
+                }catch(e){
+                    expect(e).toBeInstanceOf(DatabaseError)
+                    expect(e.message).toBe("an error is thrown by db client")
+                }
+                spiedOnQuery.mockRestore()
+            })
         })
+
         afterEach(async () => {
             await db.destroyDatabaseSchema()
             await db.endPool()
