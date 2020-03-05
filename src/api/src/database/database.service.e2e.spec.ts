@@ -326,7 +326,7 @@ describe("database service tests", () => {
                 }
             })
 
-            it("allows limits and offsets in read links", async () => {
+            it("allows limits in read links", async () => {
                 await db.query(
                     "INSERT INTO links ( url, language, title ) VALUES ('https://test1.com', 'en', 'test site 1');"
                 )
@@ -360,6 +360,132 @@ describe("database service tests", () => {
                     )
                 }
                 
+            })
+
+            it("allows limits and offsets in read links", async () => {
+                await db.query(
+                    "INSERT INTO links ( url, language, title ) VALUES ('https://test1.com', 'en', 'test site 1');"
+                )
+                await db.query(
+                    "INSERT INTO links ( url, language, title ) VALUES ('https://test2.com', 'en', 'test site 2');"
+                )
+                await db.query(
+                    "INSERT INTO links ( url, language, title ) VALUES ('https://test3.com', 'en', 'test site 3');"
+                )
+                await db.query(
+                    "INSERT INTO links ( url, language, title ) VALUES ('https://test4.com', 'en', 'test site 4');"
+                )
+
+                let dbRows = await db.query(
+                    "SELECT * FROM links ORDER BY created_on ASC LIMIT 2 OFFSET 2"
+                )
+
+                let results =  await databaseService.readLinks({
+                    limit: 2,
+                    offset: 2
+                })
+
+                for (let row in results){
+                    expect(results[row].id).toBe(
+                       dbRows.rows[row]["id"]
+                    )
+                    expect(results[row].url).toBe(
+                        dbRows.rows[row]["url"]
+                    )
+                    expect(results[row].createdOn.toISOString()).toBe(
+                        dbRows.rows[row]["created_on"].toISOString()
+                    )
+                }
+            })
+
+            it("allows descending order with limit and offset for read links", async () => {
+                await db.query(
+                    "INSERT INTO links ( url, language, title ) VALUES ('https://test1.com', 'en', 'test site 1');"
+                )
+                await db.query(
+                    "INSERT INTO links ( url, language, title ) VALUES ('https://test2.com', 'en', 'test site 2');"
+                )
+                await db.query(
+                    "INSERT INTO links ( url, language, title ) VALUES ('https://test3.com', 'en', 'test site 3');"
+                )
+                await db.query(
+                    "INSERT INTO links ( url, language, title ) VALUES ('https://test4.com', 'en', 'test site 4');"
+                )
+
+                let dbRows = await db.query(
+                    "SELECT * FROM links ORDER BY created_on DESC LIMIT 2 OFFSET 2"
+                )
+
+                let results =  await databaseService.readLinks({
+                    order: "desc",
+                    limit: 2,
+                    offset: 2
+                })
+
+                for (let row in results){
+                    expect(results[row].id).toBe(
+                       dbRows.rows[row]["id"]
+                    )
+                    expect(results[row].url).toBe(
+                        dbRows.rows[row]["url"]
+                    )
+                    expect(results[row].createdOn.toISOString()).toBe(
+                        dbRows.rows[row]["created_on"].toISOString()
+                    )
+                }
+
+            })
+
+            it("throws DatabaseError on read error in read links", async () => {
+                spiedOnQuery.mockImplementationOnce((...args) => {
+                    throw new Error("an error was thrown")
+                })
+
+                try{
+                    await databaseService.readLinks()
+                    throw new Error("DatabaseError was supposed to be thrown ")
+                }catch(e){
+                    expect(e).toBeInstanceOf(DatabaseError)
+                    expect(e.message).toBe("an error was thrown")
+                }
+            })
+
+            it("returns an empty list on no data for read links", async () => {
+                let results = await databaseService.readLinks()
+                expect(results).toMatchObject([])
+            })
+
+            it("updates link by id", async () => {
+                await db.query(
+                    "INSERT INTO links (url, language, title) VALUES " +
+                    "( 'http://test.com', 'en', 'test site' ) "
+                )
+
+                await db.query(
+                    "INSERT INTO links (url, language, title ) VALUES " +
+                    "( 'http://test2.com', 'en', 'test site 2' )"
+                )
+
+                let result = await databaseService.updateLinkById(
+                    2, 
+                    {
+                        title: "This is a new title",
+                        description: "This is a new description",
+                        imageLink: "This is a new image link",
+                        language: "fr"
+                    }
+                )
+
+                let dbResult = await db.query("SELECT * FROM links WHERE id = 2")
+
+                expect(result.id).toBe(dbResult.rows[0]["id"])
+                expect(result.url).toBe(dbResult.rows[0]["url"])
+                expect(result.title).toBe(dbResult.rows[0]["title"])
+                expect(result.description).toBe(dbResult.rows[0]["description"])
+                expect(result.language).toBe(dbResult.rows[0]["language"])
+                expect(result.updatedOn.toISOString()).toBe(
+                    dbResult.rows[0]["updated_on"].toISOString()
+                )
             })
 
 

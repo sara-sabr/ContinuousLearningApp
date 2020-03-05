@@ -152,6 +152,45 @@ export default class DatabaseService{
         return links
     }
 
+    async updateLinkById(
+        id: number, 
+        updates : Pick<Partial<Link>, 'title' | 'description' | 'imageLink' | 'language'>
+    ): Promise<Link>{
+        try {
+            let query = "UPDATE links SET "
+            
+            if (updates.title){
+                query += `title = '${updates.title}'::text, `
+            }
+            if(updates.description){
+                query += `description = '${updates.description}'::text, `
+            }
+            if (updates.imageLink){
+                query += `image_link = '${updates.imageLink}'::text, `
+            } 
+            if (updates.language){
+                query += `language = '${updates.language}'::text `
+            }
+
+            query += "WHERE id = $1::integer RETURNING *"
+
+            let result = await this.db.query(
+                query,
+                [
+                    id
+                ]
+            )
+            
+            if (result.rowCount > 0 ){
+                return this.parseRowIntoLink(
+                    result.rows[0]
+                )
+            }
+        }catch(e){
+            
+        }
+    }
+
     private parseRowIntoLink(data:QueryResultRow): Link {
         return{
             id: data["id"],
