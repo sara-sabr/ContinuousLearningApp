@@ -8,6 +8,8 @@ import { ClientConfig } from "pg"
 import * as dotenv from "dotenv"
 import {Action, Log, Link, Category } from "../interfaces/data"
 import { DatabaseError, NoDataFound } from "../utils/errors"
+import { async } from "rxjs/internal/scheduler/async"
+import { exec } from "child_process"
 
 
 dotenv.config()
@@ -571,7 +573,7 @@ describe("database service tests", () => {
                 }
             })
 
-            it ("throws DatabaseError on update error for update by id", async () => {
+            it("throws DatabaseError on update error for update by url", async () => {
                 spiedOnQuery.mockImplementationOnce((...args) => {
                     throw new Error("an error is thrown by db client")
                 })
@@ -586,6 +588,148 @@ describe("database service tests", () => {
                 }
                 spiedOnQuery.mockRestore()
             })
+
+            it("delete link by id", async () => {
+
+                await db.query(
+                    "INSERT INTO links (url, language, title) VALUES ('http://sometestingsite.com', 'en','hello')"
+                )
+                await db.query(
+                    "INSERT INTO links (url, language, title ) VALUES ('http://someothertesting.com', 'en', 'title')"
+                )
+
+
+                await databaseService.deleteLinkById(2)
+
+                let results = await db.query(
+                    "SELECT * FROM links"
+                )
+
+                expect(results.rowCount).toBe(1)
+
+                expect(results.rows[0]["url"]).toBe("http://sometestingsite.com")
+
+            })
+
+            it("throws DatabaseError on delete error for deleteLinkById", async() => {
+                spiedOnQuery.mockImplementationOnce((...args) => {
+                    throw new Error("error when deleting row")
+                })
+
+                try{
+                    await databaseService.deleteLinkById(2)
+                    throw new Error("should have thrown DatabasError")
+                }catch(e){
+                    expect(e).toBeInstanceOf(DatabaseError)
+                    expect(e.message).toBe("error when deleting row")
+                }
+            })
+
+            it("delete link by url", async () => {
+                await db.query(
+                    "INSERT INTO links (url, language, title) VALUES ('http://sometestingsite.com', 'en','hello')"
+                )
+                await db.query(
+                    "INSERT INTO links (url, language, title ) VALUES ('http://someothertesting.com', 'en', 'title')"
+                )
+
+
+                await databaseService.deleteLinkByURL('http://someothertesting.com')
+
+                let results = await db.query(
+                    "SELECT * FROM links"
+                )
+
+                expect(results.rowCount).toBe(1)
+
+                expect(results.rows[0]["url"]).toBe("http://sometestingsite.com")
+
+            })
+
+            it("search links using full text search ", async () => {
+                await db.query(
+                    "INSERT INTO links (url, language, title, description ) " +
+                    "VALUES ('https://test.com', 'en', 'testing your applications', " + 
+                    "'A site to find how you can test your applications across many different frameworks')"
+                )
+                await db.query(
+                    "INSERT INTO links ( url, language, title, description ) " +
+                    "VALUES ( 'https://javascript.com', 'en', 'Javascript Information Site', " +
+                    "'Ever wonder how to write good clean javascript, this is the site for you')"
+                )
+                await db.query(
+                    "INSERT INTO links ( url, language, title, description ) " + 
+                    "VALUES ( 'https://apprendrelefrancais', 'fr', 'Apprenez la langue française', " +
+                    "'Vous voulez améliorer votre français au quotidien. Ceci est le site pour vous!')"
+                )
+
+                let englishDBResults = await db.query(
+                    'SELECT * FROM links WHERE ftx_data @@ websearch_to_tsquery(\'en\', \'testing site\') AND language = \'en\''
+                )
+                let frenchDBResults = await db.query(
+                    'SELECT * FROM links WHERE ftx_data @@ websearch_to_tsquery(\'fr\', \'apprenez française\') AND language = \'fr\''
+                ) 
+
+                expect(englishDBResults.rowCount).toBeGreaterThan(0)
+                expect(frenchDBResults.rowCount).toBeGreaterThan(0)
+
+                let englishResults: Link[] = await databaseService.searchLinks("testing site", "en")
+                let frenchResults: Link[] = await databaseService.searchLinks("apprenez française", "fr")
+
+                expect(englishResults.length).toBe(englishDBResults.rowCount)
+                expect(frenchResults.length).toBe(frenchDBResults.rowCount)
+
+                for (let row in englishResults){
+                    expect(
+                        englishResults[row].id
+                    ).toBe(englishDBResults.rows[row]["id"])
+                    expect(
+                        englishResults[row].url
+                    ).toBe(englishDBResults.rows[row]["url"])
+                }
+
+                for (let row in frenchResults){
+                    expect(
+                        frenchResults[row].id
+                    ).toBe(frenchDBResults.rows[row]["id"])
+                    expect(
+                        frenchResults[row].url
+                    ).toBe(frenchDBResults.rows[row]["url"])
+                }
+            })
+
+            it("search links returns empty list on no data", async () => {
+                let results = await databaseService.searchLinks("there is no links", "en")
+
+                expect(results).toMatchObject(
+                    []
+                )
+            })
+
+            it("search links throws error on incorrect language input", async () => {
+                try{
+                    await databaseService.searchLinks("an example search", "ru")
+                    throw new Error("an error was not thrown")
+                }catch(e){
+                    expect(e.message).toBe("Invalid language 'ru', language must be either 'en' or 'fr'")
+                }
+            })
+
+            it("search links throws DatabaseError on read error", async () => {
+                spiedOnQuery.mockImplementationOnce((...args) => {
+                    throw new Error("an error by the db was thrown")
+                })
+
+                try{
+                    await databaseService.searchLinks("an example search", "en")
+                    throw new Error("DatabaseError was not thrown")
+                }catch(e){
+                    expect(e).toBeInstanceOf(DatabaseError)
+                    expect(e.message).toBe("an error by the db was thrown")
+                }
+            })
+            
+            
         })
 
         afterEach(async () => {

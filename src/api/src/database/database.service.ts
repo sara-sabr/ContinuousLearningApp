@@ -171,6 +171,72 @@ export default class DatabaseService{
         )
     }
 
+    async deleteLinkById(
+        id: number
+    ){
+        try{
+            await this.db.query(
+                "DELETE FROM links WHERE id = $1::integer",
+                [
+                    id
+                ]
+            )
+        }catch(e){
+            throw new DatabaseError(e.message)
+        }
+    }
+
+    async deleteLinkByURL(
+        url: string
+    ){
+        try {
+            await this.db.query(
+                "DELETE FROM links WHERE url = $1::text",
+                [
+                    url
+                ]
+            )
+        }catch(e){
+            throw new DatabaseError(e.message)
+        }
+    }
+
+    async searchLinks(
+        searchText: string,
+        language: string
+    ): Promise<Link[]> {
+        if (language !== "en" && language !== "fr"){
+            throw new Error(
+                `Invalid language '${language}', language must be either 'en' or 'fr'`
+            )
+        }
+        try{
+
+            let result = await this.db.query(
+                "SELECT * FROM links WHERE language = $1::text AND " +
+                "ftx_data @@ websearch_to_tsquery($1::regconfig, $2::text)",
+                [
+                    language,
+                    searchText
+                ]
+            )
+    
+            let resultsToReturn: Link[] = []
+            for (let row in result.rows){
+                resultsToReturn.push(
+                    this.parseRowIntoLink(
+                        result.rows[row]
+                    )
+                )
+            }
+            return resultsToReturn
+
+        }catch(e){
+            throw new DatabaseError(e.message)
+        }
+        
+    }
+
 
     private async updateLinkByField(
         field: string,
@@ -209,7 +275,6 @@ export default class DatabaseService{
             }
 
             query += ` WHERE  ${field}= $1::${type} RETURNING *`
-            console.log(query)
             result = await this.db.query(
                 query,
                 [

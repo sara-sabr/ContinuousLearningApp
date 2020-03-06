@@ -42,13 +42,6 @@ export class DatabaseOperations{
             this.client = new Client(
                 configs
             )
-
-            //attempt to connect to db
-            this.client.connect().then(
-                () => {
-                    this.endClient()
-                }
-            )
         }
     }
 
