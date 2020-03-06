@@ -1,9 +1,9 @@
 
-import { Injectable, NotImplementedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import ConfigurationService from "../configs/config.service"
 import { DatabaseOperations } from "./db";
 import {ClientConfig, QueryResult, QueryResultRow } from "pg";
-import {Link, Category, Action, Log } from "../interfaces/data"
+import { Link } from "../interfaces/data"
 import {DatabaseError, NoDataFound} from "../utils/errors"
 
 
