@@ -1,7 +1,14 @@
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
-import { AppModule } from './../src/app.module';
+import { AppModule } from './app.module';
 import { INestApplication } from '@nestjs/common';
+import ConfigurationService from "./configs/config.service"
+import * as dotenv from "dotenv"
+import { mocked } from 'ts-jest/utils';
+
+dotenv.config()
+jest.mock("../src/configs/config.service")
+const mockedConfigurationService = mocked(ConfigurationService, true)
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;

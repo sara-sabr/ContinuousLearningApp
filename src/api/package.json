@@ -14,12 +14,16 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
+    "test:sequentually": "jest -i",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
+    "test:cov": "jest --coverage -i",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "database:create": "ts-node src/database/database-scripts.ts create",
     "database:delete": "ts-node src/database/database-scripts.ts delete",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e":  "jest -i .e2e.spec.ts",
+    "test:e2e-cov": "jest --coverage -i .e2e.spec.ts",
+    "test:unit": "jest --testPathIgnorePatterns .e2e.spec.ts",
+    "test:unit-cov": "jest --coverage --testPathIgnorePatterns .e2e.spec.ts"
   },
   "dependencies": {
     "@nestjs/common": "^6.10.14",

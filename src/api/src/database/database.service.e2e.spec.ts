@@ -8,8 +8,7 @@ import { ClientConfig } from "pg"
 import * as dotenv from "dotenv"
 import {Action, Log, Link, Category } from "../interfaces/data"
 import { DatabaseError, NoDataFound } from "../utils/errors"
-import { async } from "rxjs/internal/scheduler/async"
-import { exec } from "child_process"
+
 
 
 dotenv.config()
