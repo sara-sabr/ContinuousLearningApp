@@ -21,7 +21,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "database:create": "ts-node src/database/database-scripts.ts create",
     "database:delete": "ts-node src/database/database-scripts.ts delete",
-    "test:e2e":  "jest -i .e2e.spec.ts",
+    "test:e2e": "jest -i .e2e.spec.ts",
     "test:e2e-cov": "jest --coverage -i .e2e.spec.ts",
     "test:unit": "jest --testPathIgnorePatterns .e2e.spec.ts",
     "test:unit-cov": "jest --coverage --testPathIgnorePatterns .e2e.spec.ts"
