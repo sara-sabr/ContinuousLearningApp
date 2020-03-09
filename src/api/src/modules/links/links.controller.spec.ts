@@ -7,7 +7,6 @@ import { mocked } from "ts-jest/utils"
 import { ReturnedLinkDTO } from "./dto/returned-link.dto"
 import { DatabaseError, NoDataFound } from "../../utils/errors"
 import { HttpException, HttpStatus } from "@nestjs/common"
-import { async } from "rxjs/internal/scheduler/async"
 
 jest.mock("../../database/database.service")
 jest.mock("../../configs/config.service")
@@ -123,6 +122,90 @@ describe( "LinksController", () => {
             })
             afterEach(() => {
                 mockedReadLinkByID.mockRestore()
+            })
+        })
+
+        describe("getLinks", () => {
+            let mockedReadLinks: jest.SpyInstance
+            beforeEach(() => {
+                mockedReadLinks = jest.spyOn(databaseService, "readLinks")
+            })
+
+            it("getLinks", async () => {
+                let results = await databaseService.readLinks()
+                mockedReadLinks.mockImplementationOnce(
+                    (...args) => {
+                        return results
+                    }
+                )
+
+                let controllerResults = await linksController.getLinks()
+                expect(mockedReadLinks.mock.calls.length).toBe(2)
+
+                for (let row in controllerResults){
+                    expect(controllerResults[row].id).toBe(results[row].id)
+                    expect(controllerResults[row].url).toBe(results[row].url)
+                    expect(controllerResults[row].title).toBe(results[row].title)
+                    expect(controllerResults[row].language).toBe(results[row].language)
+                    expect(controllerResults[row].createdOn.toISOString()).toBe(
+                        results[row].createdOn.toISOString()
+                    )
+                }
+            })
+
+            it("throws HttpException on DatabaseError", async () => {
+                mockedReadLinks.mockImplementationOnce((...args) => {
+                    throw new DatabaseError("a database error thrown")
+                })
+
+                try{
+                    await linksController.getLinks()
+                    throw new Error("an error was not thrown")
+                }catch(e){
+                    expect(e).toBeInstanceOf(HttpException)
+                    expect(e.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR)
+                    expect(e.message).toBe(
+                        "A database error has occured: a database error thrown"
+                    )
+                }
+
+            })
+
+            it("getLinks with order argument", async () => {
+
+                let controllerResults = await linksController.getLinks(
+                    "desc"
+                )
+
+                expect(mockedReadLinks.mock.calls.length).toBe(1)
+                expect(mockedReadLinks.mock.calls[0][0]).toMatchObject(
+                    {
+                        order: "desc"
+                    }
+                )
+
+                expect(controllerResults.length).toBe(20)
+
+            }) 
+
+            it("bad order argument throws HttpException getLinks", async () => {
+                try{
+                    await linksController.getLinks(
+                        "somebadorder"
+                    )
+                    throw new Error("An error was not thrown")
+                }catch(e){
+                    expect(e).toBeInstanceOf(HttpException)
+                    expect(e.status).toBe(HttpStatus.BAD_REQUEST)
+                    expect(e.message).toBe(
+                        "Bad request: order must have value of either asc or desc"
+                    )
+                }
+            })
+
+
+            afterEach(() => {
+                mockedReadLinks.mockRestore()
             })
         })
         

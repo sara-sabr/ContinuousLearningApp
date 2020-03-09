@@ -69,7 +69,6 @@ export default class DatabaseService {
                 }
             )
         }
-
         return links
     }
 
