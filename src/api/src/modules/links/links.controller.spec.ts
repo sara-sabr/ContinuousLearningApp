@@ -5,6 +5,9 @@ import DatabaseService from "../../database/database.service"
 import ConfigurationService from "../../configs/config.service"
 import { mocked } from "ts-jest/utils"
 import { ReturnedLinkDTO } from "./dto/returned-link.dto"
+import { DatabaseError } from "../../utils/errors"
+import { HttpException, HttpStatus } from "@nestjs/common"
+import { async } from "rxjs/internal/scheduler/async"
 
 jest.mock("../../database/database.service")
 jest.mock("../../configs/config.service")
@@ -58,6 +61,44 @@ describe( "LinksController", () => {
                 expect(results.createdOn).toBeInstanceOf(Date)
                 expect(results.updatedOn).toBeInstanceOf(Date)
             
+            })
+
+            it("throws HttpException on DatabaseError getLinkById", async () => {
+                mockedReadLinkByID.mockImplementationOnce((...args) => {
+                    throw new DatabaseError(
+                        "an exception occured from the database"
+                    )
+                })
+
+                try{
+                    await linksController.getLinkById(1)
+                }catch(e){
+                    expect(e).toBeInstanceOf(HttpException)
+                    expect(e.message).toBe(
+                        "A database error has occured: an exception occured from the database"
+                    )
+                    expect(e.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR)
+                }
+            })
+
+            it("throws HttpException on Error getLinkById", async () => {
+                mockedReadLinkByID.mockImplementationOnce((...args) => {
+                    throw new Error(
+                        "an exception occured in general"
+                    )
+                })
+
+                try{
+                    await linksController.getLinkById(1)
+                }catch(e){
+                    expect(e).toBeInstanceOf(HttpException)
+                    expect(e.message).toBe(
+                        "An unknown error has occured"
+                    )
+                    expect(e.status).toBe(
+                        HttpStatus.INTERNAL_SERVER_ERROR
+                    )
+                }
             })
             afterEach(() => {
                 mockedReadLinkByID.mockRestore()
