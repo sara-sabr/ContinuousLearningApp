@@ -153,7 +153,7 @@ describe( "LinksController", () => {
                 }
             })
 
-            it("throws HttpException on DatabaseError", async () => {
+            it("throws HttpException on DatabaseError getLinks()", async () => {
                 mockedReadLinks.mockImplementationOnce((...args) => {
                     throw new DatabaseError("a database error thrown")
                 })
@@ -169,6 +169,20 @@ describe( "LinksController", () => {
                     )
                 }
 
+            })
+
+            it("throws HttpException on Error getLinks", async () => {
+                mockedReadLinks.mockImplementationOnce((...args) => {
+                    throw new Error("an error has occured")
+                })
+
+                try{
+                    await linksController.getLinks()
+                    throw new Error("an error was not thrown")
+                }catch(e){
+                    expect(e).toBeInstanceOf(HttpException)
+                    // complete test
+                }
             })
 
             it("getLinks with order argument", async () => {
