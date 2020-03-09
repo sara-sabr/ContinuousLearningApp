@@ -5,7 +5,7 @@ import DatabaseService from "../../database/database.service"
 import ConfigurationService from "../../configs/config.service"
 import { mocked } from "ts-jest/utils"
 import { ReturnedLinkDTO } from "./dto/returned-link.dto"
-import { DatabaseError } from "../../utils/errors"
+import { DatabaseError, NoDataFound } from "../../utils/errors"
 import { HttpException, HttpStatus } from "@nestjs/common"
 import { async } from "rxjs/internal/scheduler/async"
 
@@ -72,6 +72,7 @@ describe( "LinksController", () => {
 
                 try{
                     await linksController.getLinkById(1)
+                    throw new Error("an error was not thrown")
                 }catch(e){
                     expect(e).toBeInstanceOf(HttpException)
                     expect(e.message).toBe(
@@ -90,6 +91,7 @@ describe( "LinksController", () => {
 
                 try{
                     await linksController.getLinkById(1)
+                    throw new Error("an error was not thrown")
                 }catch(e){
                     expect(e).toBeInstanceOf(HttpException)
                     expect(e.message).toBe(
@@ -97,6 +99,25 @@ describe( "LinksController", () => {
                     )
                     expect(e.status).toBe(
                         HttpStatus.INTERNAL_SERVER_ERROR
+                    )
+                }
+            })
+
+            it("throws HttpException on NoDataFound getLinkById", async () => {
+                mockedReadLinkByID.mockImplementationOnce(
+                    (...args) => { throw new NoDataFound("data could not find link for id 1")}
+                )
+
+                try{
+                    await linksController.getLinkById(1)
+                    throw new Error("an error was not thrown")
+                }catch(e){
+                    expect(e).toBeInstanceOf(HttpException)
+                    expect(e.message).toBe(
+                        "Resource not found: data could not find link for id 1"
+                    )
+                    expect(e.status).toBe(
+                        HttpStatus.NOT_FOUND
                     )
                 }
             })

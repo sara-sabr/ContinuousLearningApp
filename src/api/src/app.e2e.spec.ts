@@ -8,7 +8,7 @@ import ConfigurationService from "./configs/config.service"
 import * as dotenv from "dotenv"
 import * as path from "path"
 import { mocked } from 'ts-jest/utils';
-import { syncBuiltinESMExports } from 'module';
+
 
 dotenv.config()
 jest.mock("../src/configs/config.service")
@@ -47,59 +47,99 @@ describe('AppController (e2e)', () => {
         .expect(200)
         .expect('Hello World!');
     });
-  
-    it("/link/:id (GET)", async () => {
-      let link1 = await db.query(
-        "INSERT INTO links (url, title, language, description, image_link) " +
-        "VALUES ('https://test1.com', 'test1', 'en', 'This is a testing site', 'https://test1.com/png') " +
-        "RETURNING *"
-      )
-  
-      let link2 = await db.query(
-        "INSERT INTO links (url, title, language, description, image_link) " +
-        "VALUES ('https://test2.com', 'test2', 'fr', 'This is a testing site', 'https://test2.com/png') " +
-        "RETURNING *"
-      )
-  
-      let link3 = await db.query(
-        "INSERT INTO links (url, title, language, description, image_link) " +
-        "VALUES ('https://test3.com', 'test3', 'fr', 'This is a testing site', 'https://test3.com/png') " +
-        "RETURNING *"
-      )
-  
-      let request1 = await request(app.getHttpServer()).get("/links/1")
-      let request2 = await request(app.getHttpServer()).get("/links/2")
-      let request3 = await request(app.getHttpServer()).get("/links/3")
-  
-      // let request2Response = await request2
-      // let request3Response = await request3
 
-      expect(request1.status).toBe(200)
-      expect(request2.status).toBe(200)
-      expect(request3.status).toBe(200)
+    describe("link routes", () => {
 
-      let rowArray = [link1, link2, link3]
-      let requestArray = [request1, request2, request3]
-      
-      for (let i = 0; i < rowArray.length; i ++){
-        let row = rowArray[i].rows[0]
-        let request = requestArray[i]
-        expect(request.body).toMatchObject(
-          {
-            id: row["id"],
-            url: row["url"],
-            language: row["language"],
-            title: row["title"],
-            description: row["description"],
-            imageLink: row["image_link"],
-            createdOn: row["created_on"].toISOString(),
-            updatedOn: row["updated_on"]
-          }
+      it("/link/:id (GET)", async () => {
+        let link1 = await db.query(
+          "INSERT INTO links (url, title, language, description, image_link) " +
+          "VALUES ('https://test1.com', 'test1', 'en', 'This is a testing site', 'https://test1.com/png') " +
+          "RETURNING *"
+        )
+    
+        let link2 = await db.query(
+          "INSERT INTO links (url, title, language, description, image_link) " +
+          "VALUES ('https://test2.com', 'test2', 'fr', 'This is a testing site', 'https://test2.com/png') " +
+          "RETURNING *"
+        )
+    
+        let link3 = await db.query(
+          "INSERT INTO links (url, title, language, description, image_link) " +
+          "VALUES ('https://test3.com', 'test3', 'fr', 'This is a testing site', 'https://test3.com/png') " +
+          "RETURNING *"
+        )
+    
+        let request1 = await request(app.getHttpServer()).get("/links/1")
+        let request2 = await request(app.getHttpServer()).get("/links/2")
+        let request3 = await request(app.getHttpServer()).get("/links/3")
+    
+        // let request2Response = await request2
+        // let request3Response = await request3
+  
+        expect(request1.status).toBe(200)
+        expect(request2.status).toBe(200)
+        expect(request3.status).toBe(200)
+  
+        let rowArray = [link1, link2, link3]
+        let requestArray = [request1, request2, request3]
+        
+        for (let i = 0; i < rowArray.length; i ++){
+          let row = rowArray[i].rows[0]
+          let request = requestArray[i]
+          expect(request.body).toMatchObject(
+            {
+              id: row["id"],
+              url: row["url"],
+              language: row["language"],
+              title: row["title"],
+              description: row["description"],
+              imageLink: row["image_link"],
+              createdOn: row["created_on"].toISOString(),
+              updatedOn: row["updated_on"]
+            }
+          )
+  
+        }
+      })
+
+      it("Internal Error for DatabaseError /links/:id (GET)", async () => {
+        let spiedOnQuery = jest.spyOn(db, "query")
+        spiedOnQuery.mockImplementationOnce((...args) => { throw new Error("an error happened from the db")})
+
+        let res = await request(app.getHttpServer()).get("/links/1")
+
+        expect(res.status).toBe(500)
+        expect(res.body["message"]).toBe(
+          "A database error has occured: an error happened from the db"
         )
 
-      }
+
+        spiedOnQuery.mockRestore()
+      })
+
+      it("Internal Error for Error /links/:id (GET)", async () => {
+        let spiedOnReadLinkByID = jest.spyOn(databaseService, "readLinkById")
+
+        spiedOnReadLinkByID.mockImplementationOnce( (...args) => { throw new Error("an error occured ")})
+
+        let res = await request(app.getHttpServer()).get("/links/1")
+
+        expect(res.status).toBe(500)
+        expect(res.body["message"]).toBe(
+          "An unknown error has occured"
+        )
+      })
+
+      it("Not Found for non existant id /links/:id (GET)", async () => {
+        let res = await request(app.getHttpServer()).get("/links/1")
+
+        expect(res.status).toBe(404)
+        expect(res.body["message"]).toBe(
+          "Resource not found: No links found for id 1"
+        )
+      })
+
     })
-  
     afterAll( async () => {
       await db.destroyDatabaseSchema()
       await db.endPool()
