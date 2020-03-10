@@ -10,9 +10,11 @@ export class LinksController{
         return this.linksService.getLinkById(idNum)
     }
 
-    async getLinks(@Query("order") order? ){
+    async getLinks(@Query("order") order?, @Query("offset") offset?, @Query("limit") limit?){
         return this.linksService.getLinks({
-            order: order
+            order: order,
+            offset: offset,
+            limit: limit
         })
     }
 }

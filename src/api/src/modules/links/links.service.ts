@@ -45,10 +45,45 @@ export class LinksService{
     }
 
     async getLinks(options?:{
-        order?: string
+        order?: string,
+        offset?: string,
+        limit?: string
     }): Promise<ReturnedLinkDTO[]>{
+        // we recieve all arguments as string 
+        // make sure that offset and limit are numbers
+        let parsedOptions: {
+            order? : string,
+            offset?: number,
+            limit?: number
+        } = {}
+        if (options && options["order"]){
+            parsedOptions.order = options.order
+        }
+        
+        if (options && options["offset"]){
+            let parsedOffset = parseInt(options.offset) 
+            if (isNaN(parsedOffset) || parsedOffset < 0){
+                throw new HttpException(
+                    "Bad request: offset should be a number 0 or greater",
+                    HttpStatus.BAD_REQUEST
+                )
+            }
+            parsedOptions.offset = parsedOffset
+        }
+
+        if(options && options["limit"]){
+            let parsedLimit = parseInt(options.limit)
+            if(isNaN(parsedLimit) || parsedLimit < 0){
+                throw new HttpException(
+                    "Bad request: limit should be a number 0 or greater",
+                    HttpStatus.BAD_REQUEST
+                )
+            }
+            parsedOptions.limit = parsedLimit
+        }
+
         try{
-            let dbResult = await this.databaseService.readLinks(options)
+            let dbResult = await this.databaseService.readLinks(parsedOptions)
             let returnedData: ReturnedLinkDTO[] = []
             for (let row in dbResult){
                 returnedData.push(
@@ -79,6 +114,11 @@ export class LinksService{
                     HttpStatus.INTERNAL_SERVER_ERROR
                 )
             }
+
+            throw new HttpException(
+                "An unknown error has occured",
+                HttpStatus.INTERNAL_SERVER_ERROR
+            )
         }
     } 
 
