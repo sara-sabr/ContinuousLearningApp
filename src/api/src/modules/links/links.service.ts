@@ -10,9 +10,17 @@ export class LinksService{
 
     }
     
-    async getLinkById(id: number): Promise<ReturnedLinkDTO> {
+    async getLinkById(id: string): Promise<ReturnedLinkDTO> {
+        let parsedId = parseInt(id)
+        if (isNaN(parsedId) || parsedId < 1){
+            throw new HttpException(
+                "Bad request: id must be a number 1 or greater",
+                HttpStatus.BAD_REQUEST
+            )
+        }
+
         try{
-            let dbResult = await this.databaseService.readLinkById(id)
+            let dbResult = await this.databaseService.readLinkById(parsedId)
             let returnedData: ReturnedLinkDTO =  {
                 id: dbResult.id,
                 language: dbResult.language,

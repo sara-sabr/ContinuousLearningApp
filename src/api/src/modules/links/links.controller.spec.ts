@@ -128,8 +128,20 @@ describe( "LinksController", () => {
                     throw new Error("an error was not thrown")
                 }catch(e){
                     expect(e).toBeInstanceOf(HttpException)
-                    expect(e.status).toBe(HttpStatus.NOT_FOUND)
-                    // test for message 
+                    expect(e.status).toBe(HttpStatus.BAD_REQUEST)
+                    expect(e.message).toBe(
+                        "Bad request: id must be a number 1 or greater"
+                    ) 
+                }
+                try{
+                    await linksController.getLinkById("0")
+                    throw new Error("an error was not thrown")
+                }catch(e){
+                    expect(e).toBeInstanceOf(HttpException)
+                    expect(e.status).toBe(HttpStatus.BAD_REQUEST)
+                    expect(e.message).toBe(
+                        "Bad request: id must be a number 1 or greater"
+                    )
                 }
             })
 
@@ -201,7 +213,7 @@ describe( "LinksController", () => {
 
             it("getLinks with order argument", async () => {
 
-                let controllerResults = await linksController.getLinks(
+                await linksController.getLinks(
                     "desc"
                 )
 
