@@ -49,14 +49,6 @@ describe('AppController (e2e)', () => {
         throw err
       }
     })
-  
-    it('/ (GET)', () => {
-      return request(app.getHttpServer())
-        .get('/')
-        .expect(200)
-        .expect('Hello World!');
-    });
-
     describe("links routes", () => {
 
       it("/links/:id (GET)", async () => {
