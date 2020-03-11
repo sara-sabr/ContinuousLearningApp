@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query} from "@nestjs/common"
+import { Controller, Get, Param, Query, ValidationPipe, UsePipes, Post, Body} from "@nestjs/common"
 import {
     ApiQuery, 
     ApiResponse, 
@@ -10,6 +10,7 @@ import {
     
 } from "@nestjs/swagger"
 import {ReturnedLinkDTO} from "./dto/returned-link.dto"
+import {CreateLinkDTO} from "./dto/create-link.dto"
 import { LinksService } from "./links.service"
 import { type } from "os"
 
@@ -106,5 +107,11 @@ export class LinksController{
             offset: offset,
             limit: limit
         })
+    }
+
+    @Post()
+    @UsePipes( new ValidationPipe())
+    async createLink(@Body() createLinkDTO: CreateLinkDTO){
+        return this.linksService.createLink(createLinkDTO)
     }
 }

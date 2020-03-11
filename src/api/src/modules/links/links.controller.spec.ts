@@ -7,7 +7,7 @@ import { mocked } from "ts-jest/utils"
 import { ReturnedLinkDTO } from "./dto/returned-link.dto"
 import { DatabaseError, NoDataFound } from "../../utils/errors"
 import { HttpException, HttpStatus } from "@nestjs/common"
-import { async } from "rxjs/internal/scheduler/async"
+
 
 jest.mock("../../database/database.service")
 jest.mock("../../configs/config.service")
@@ -321,11 +321,103 @@ describe( "LinksController", () => {
                 }
             })
 
-
-
-
             afterEach(() => {
                 mockedReadLinks.mockRestore()
+            })
+        })
+
+        describe("createLink", () => {
+            let mockedCreateLink: jest.SpyInstance
+            beforeEach(() => {
+                mockedCreateLink = jest.spyOn(
+                    databaseService, "createLink"
+                )
+            })
+
+            it("returns number on valid data", async () => {
+               let result = await linksController.createLink(
+                   {
+                       url: "hello.com",
+                       language: "en",
+                       title: "this is a site",
+                       description: "this is a description",
+                       imageLink: "hello.com/linkToImage.png"
+                   }
+               )
+               expect(mockedCreateLink.mock.calls.length).toBe(1)
+               expect(mockedCreateLink.mock.calls[0][0]).toMatchObject(
+                   {
+                       url: "hello.com",
+                       language: "en",
+                       title: "this is a site",
+                       description: "this is a description",
+                       imageLink: "hello.com/linkToImage.png"
+                   }
+               )
+
+               expect(result.id).toEqual(expect.any(Number))
+
+            })
+
+            it("throws HttpException for DatabaseError", async () => {
+                mockedCreateLink.mockImplementationOnce((...args) => {
+                    throw new DatabaseError("a db error has occured")
+                })
+
+                try{
+                    await linksController.createLink(
+                        {
+                            url: "hello.com",
+                            language: "en",
+                            title: "this is a site",
+                            description: "this is a description",
+                            imageLink: "hello.com/linkToImage.png"
+                        }
+                    )
+                    throw new Error(
+                        "did not throw error"
+                    )
+                }catch(e){
+                    expect(e).toBeInstanceOf(HttpException)
+                    expect(e.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR)
+                    expect(e.message).toBe(
+                        "A database error has occured: a db error has occured" 
+                    )
+                }
+            })
+
+            it("throws HttpException for Error", async () => {
+                mockedCreateLink.mockImplementationOnce(
+                    (...args) => {
+                        throw new Error("an error has occured")
+                    }
+                )
+
+                try{
+                    await linksController.createLink(
+                        {
+                            url: "hello.com",
+                            language: "en",
+                            title: "this is a site",
+                            description: "this is a description",
+                            imageLink: "hello.com/linkToImage.png"
+                        }
+                    )
+                    throw new Error(
+                        "did not throw error"
+                    )
+                }catch(e){
+                    expect(e).toBeInstanceOf(HttpException)
+                    expect(e.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR)
+                    expect(e.message).toBe(
+                        "An unknown error has occured" 
+                    )
+                }
+                
+            })
+            
+            afterEach(() => {
+                mockedCreateLink.mockRestore()
             })
         })
         

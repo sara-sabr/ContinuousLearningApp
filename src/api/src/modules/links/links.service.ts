@@ -1,8 +1,10 @@
 import { Injectable, HttpException, HttpStatus} from "@nestjs/common"
 import DatabaseService from "../../database/database.service"
 import { ReturnedLinkDTO } from "./dto/returned-link.dto"
+import { CreateLinkDTO } from "./dto/create-link.dto"
+import { Link } from "../../interfaces/data"
 import { DatabaseError, NoDataFound } from "../../utils/errors"
-import { Link } from "src/interfaces/data"
+
 
 @Injectable()
 export class LinksService{
@@ -128,7 +130,31 @@ export class LinksService{
                 HttpStatus.INTERNAL_SERVER_ERROR
             )
         }
-    } 
+    }
+    
+    
+    async createLink(createLinkDTO: CreateLinkDTO){
+        try {
+            let link = {
+                ...createLinkDTO
+            }
+            return {
+                id: await this.databaseService.createLink(link)
+            }
+        }catch(e){
+            if (e instanceof DatabaseError){
+                throw new HttpException(
+                    "A database error has occured: " + e.message,
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                )
+            }
+
+            throw new HttpException(
+                "An unknown error has occured",
+                HttpStatus.INTERNAL_SERVER_ERROR
+            )
+        }
+    }
 
       
 
