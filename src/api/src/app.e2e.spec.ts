@@ -8,6 +8,15 @@ import ConfigurationService from "./configs/config.service"
 import * as dotenv from "dotenv"
 import * as path from "path"
 import { mocked } from 'ts-jest/utils';
+import { DatabaseError } from './utils/errors';
+
+/** TODO 
+ * mocking the databaseService to throw Error to test unknown error response
+ should replace this with something that doesn't break if I change the implementation
+ * refactor to add heading using to describe instead of having to add which route I'm 
+ testing each time. Seperate by HTTP methods 
+ * take mocking out of individual tests 
+*/
 
 
 dotenv.config()
@@ -102,6 +111,14 @@ describe('AppController (e2e)', () => {
         }
       })
 
+      it("Bad Request for invalid id parameter", async () => {
+        let requestResponse = await request(app.getHttpServer()).get("/links/badid")
+        expect(requestResponse.status).toBe(400)
+        expect(requestResponse.body["message"]).toBe(
+          "Bad request: id must be a number 1 or greater"
+        )
+      })
+
       it("Internal Error for DatabaseError /links/:id (GET)", async () => {
         let spiedOnQuery = jest.spyOn(db, "query")
         spiedOnQuery.mockImplementationOnce((...args) => { throw new Error("an error happened from the db")})
@@ -183,8 +200,95 @@ describe('AppController (e2e)', () => {
               updatedOn: row["updated_on"]
             }
           )
-  
         }
+      })
+
+      it("returns an empty list for no data /links (GET)", async () => {
+        let requestResponse = await request(app.getHttpServer()).get("/links")
+        expect(requestResponse.status).toBe(200)
+        expect(requestResponse.body).toMatchObject([])
+      })
+
+      it("Internal Error for DatabaseError /links (GET)", async () => {
+        let spiedOnReadLinks = jest.spyOn(databaseService, "readLinks")
+        spiedOnReadLinks.mockImplementationOnce((...args) => {
+          throw new DatabaseError("a db error occured")
+        })
+
+        let requestResponse = await request(app.getHttpServer()).get("/links")
+        expect(requestResponse.status).toBe(500)
+        expect(requestResponse.body["message"]).toBe(
+          "A database error has occured: a db error occured"
+        )
+
+        spiedOnReadLinks.mockRestore()
+      })
+
+      it("Internal Error for Error /links (GET)", async () => {
+        let spiedOnReadLinks = jest.spyOn(databaseService, "readLinks")
+        spiedOnReadLinks.mockImplementationOnce((...args) => {
+          throw new Error("an error has occured")
+        })
+
+        let requestResponse = await request(app.getHttpServer()).get("/links")
+        expect(requestResponse.status).toBe(500)
+        expect(requestResponse.body["message"]).toBe(
+          "An unknown error has occured"
+        )
+        spiedOnReadLinks.mockRestore()
+      })
+
+      it("order query parameter /links (GET)", async () => {
+        let link1 = await db.query(
+          "INSERT INTO links (url, title, language, description, image_link) " +
+          "VALUES ('https://test1.com', 'test1', 'en', 'This is a testing site', 'https://test1.com/png') " +
+          "RETURNING *"
+        )
+           
+        let link2 = await db.query(
+          "INSERT INTO links (url, title, language, description, image_link) " +
+          "VALUES ('https://test2.com', 'test2', 'fr', 'This is a testing site', 'https://test2.com/png') " +
+          "RETURNING *"
+        )
+           
+        let link3 = await db.query(
+          "INSERT INTO links (url, title, language, description, image_link) " +
+          "VALUES ('https://test3.com', 'test3', 'fr', 'This is a testing site', 'https://test3.com/png') " +
+          "RETURNING *"
+        )
+
+        let requestResponse = await request(app.getHttpServer()).get("/links?order=desc")
+
+        expect(requestResponse.status).toBe(200)
+        expect(requestResponse.body).toHaveLength(3)
+
+        let rowArray = [link3 , link2, link1]
+        let requestBody = requestResponse.body
+
+        for (let i = 0; i < rowArray.length; i ++){
+          let row = rowArray[i].rows[0]
+          let link = requestBody[i]
+          expect(link).toMatchObject(
+            {
+              id: row["id"],
+              url: row["url"],
+              language: row["language"],
+              title: row["title"],
+              description: row["description"],
+              imageLink: row["image_link"],
+              createdOn: row["created_on"].toISOString(),
+              updatedOn: row["updated_on"]
+            }
+          )
+        }        
+      })
+
+      it("Bad Request for invalid option query parameter /links (GET)", async()=> {
+        let requestResponse = await request(app.getHttpServer()).get("/links?order=invalidorder")
+        expect(requestResponse.status).toBe(400)
+        expect(requestResponse.body["message"]).toBe(
+          "Bad request: order must have value of either asc or desc"
+        )
       })
 
     })
