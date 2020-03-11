@@ -412,8 +412,37 @@ describe( "LinksController", () => {
                     expect(e.message).toBe(
                         "An unknown error has occured" 
                     )
+                }  
+            })
+
+            it("throws HttpException for non unique url DatabaseError", async () => {
+                mockedCreateLink.mockImplementationOnce(
+                    (...args) => {
+                        throw new DatabaseError('duplicate key value violates unique constraint "links_url_key"')
+                    }
+                )
+                try{
+                    await linksController.createLink(
+                        {
+                            url: "hello.com",
+                            language: "en",
+                            title: "this is a site",
+                            description: "this is a description",
+                            imageLink: "hello.com/linkToImage.png"
+                        }
+                    )
+                    throw new Error(
+                        "did not throw error"
+                    )
+                    
+                }catch(e){
+                    expect(e).toBeInstanceOf(HttpException)
+                    expect(e.status).toBe(400)
+                    expect(e.message).toBe(
+                        "Bad request: url 'hello.com' already exists"
+                    )
+
                 }
-                
             })
             
             afterEach(() => {

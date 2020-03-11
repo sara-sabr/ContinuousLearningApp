@@ -143,6 +143,12 @@ export class LinksService{
             }
         }catch(e){
             if (e instanceof DatabaseError){
+                if (e.message.match(/duplicate key value violates unique constraint "links_url_key"/)){
+                    throw new HttpException(
+                        `Bad request: url '${createLinkDTO.url}' already exists`,
+                        HttpStatus.BAD_REQUEST
+                    )
+                }
                 throw new HttpException(
                     "A database error has occured: " + e.message,
                     HttpStatus.INTERNAL_SERVER_ERROR

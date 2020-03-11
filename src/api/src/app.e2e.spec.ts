@@ -439,7 +439,7 @@ describe('AppController (e2e)', () => {
           "/links"
         ).send(
           {
-            url: "thisisaurl.com",
+            url: "https://thisisaurl.com",
             language: "en",
             title: "this is a title",
             description: "This is description for a url",
@@ -457,13 +457,314 @@ describe('AppController (e2e)', () => {
         expect(dbRow.rowCount).toBe(1)
 
         expect(dbRow.rows[0].id).toBe(1)
-        expect(dbRow.rows[0].url).toBe("thisisaurl.com")
+        expect(dbRow.rows[0].url).toBe("https://thisisaurl.com")
         expect(dbRow.rows[0].title).toBe("this is a title")
         expect(dbRow.rows[0].language).toBe("en")
         expect(dbRow.rows[0].image_link).toBe("thisisaurl.com/something.png")
         expect(dbRow.rows[0].description).toBe("This is description for a url")
       })
+      it.only("Internal Error for DatabaseError /links (POST)", async () => {
+        let spiedOnCreateLink = jest.spyOn(
+          databaseService, "createLink"
+        )
+        spiedOnCreateLink.mockImplementationOnce(
+          (...args) => {
+            throw new DatabaseError("a db error occured")
+          } 
+        )
+        
+        let requestResponse = await request(app.getHttpServer()).post(
+          "/links"
+        ).send(
+          {
+            url: "https://thisisaurl.com",
+            language: "en",
+            title: "this is a title",
+            description: "This is description for a url",
+            imageLink: "thisisaurl.com/something.png",
+
+          }
+        )
+
+        expect(requestResponse.status).toBe(500)
+
+        expect(requestResponse.body.message).toBe(
+          "A database error has occured: a db error occured"
+        )
+        spiedOnCreateLink.mockRestore()
+      
+      })
+
+      it.only("Internal Error for Error /links (POST)", async () =>{
+        let spiedOnCreateLink = jest.spyOn(
+          databaseService, "createLink"
+        )
+        spiedOnCreateLink.mockImplementationOnce(
+          (...args) => {
+            throw new Error("some error occured")
+          } 
+        )
+                
+        let requestResponse = await request(app.getHttpServer()).post(
+          "/links"
+        ).send(
+          {
+            url: "https://thisisaurl.com",
+            language: "en",
+            title: "this is a title",
+            description: "This is description for a url",
+            imageLink: "thisisaurl.com/something.png",
+        
+          }
+        )
+        
+        expect(requestResponse.status).toBe(500)
+        expect(requestResponse.body.message).toBe(
+          "An unknown error has occured"
+        )
+        spiedOnCreateLink.mockRestore()
+      })
+      
+      it.only("url, title, language are mandatory but nothing else /links (POST)", async () => {
+        let requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://testing.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+  
+        expect(requestResponse.status).toBe(201)
+        expect(requestResponse.body.id).toBe(1)
+      })
+
+      it.only("url field is required /links (POST)", async () => {
+        let requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            title: "This is testing",
+            language: "en"
+          }
+        )
+        
+        expect(requestResponse.status).toBe(400)
+        expect(requestResponse.body.message[0].property).toBe("url")
+
+        requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://aurlhasnowbeenincluded.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+                
+        expect(requestResponse.status).toBe(201)
+      })
+
+      it.only("url field should have a protocol /links (POST)", async () => {
+        let requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "noprotocol.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+                
+        expect(requestResponse.status).toBe(400)
+        expect(requestResponse.body.message[0].property).toBe("url")
+
+        requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://noprotocol.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+
+        expect(requestResponse.status).toBe(201)
+      })
+
+      it.only("url field should have a host /links (POST)", async () => {
+        let requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+                
+        expect(requestResponse.status).toBe(400)
+        expect(requestResponse.body.message[0].property).toBe("url")
+  
+        requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+  
+        expect(requestResponse.status).toBe(201)
+      })
+
+      it.only("url field should have a tld /links (POST)", async () => {
+        let requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+                
+        expect(requestResponse.status).toBe(400)
+        expect(requestResponse.body.message[0].property).toBe("url")
+  
+        requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+  
+        expect(requestResponse.status).toBe(201)
+      })
+
+      it.only("title field is required /links (POST)", async () => {
+        let requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host.com",
+            language: "en"
+          }
+        )
+        
+        expect(requestResponse.status).toBe(400)
+        expect(requestResponse.body.message[0].property).toBe("title")
+
+        requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+
+        expect(requestResponse.status).toBe(201)
+      })
+      it.only("title field is must not be empty /links (POST)", async () => {
+        let requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host.com",
+            title: "",
+            language: "en"
+          }
+        )
+        
+        expect(requestResponse.status).toBe(400)
+        expect(requestResponse.body.message[0].property).toBe("title")
+
+        requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+
+        expect(requestResponse.status).toBe(201)
+      })
+
+      it.only("language is required /links (POST)", async () => {
+        let requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host.com",
+            title: "This is testing"
+          }
+        )
+        
+        expect(requestResponse.status).toBe(400)
+        expect(requestResponse.body.message[0].property).toBe("language")
+
+        requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+        expect(requestResponse.status).toBe(201)
+      })
+
+      it.only("language must be en or fr /links (POST)", async () => {
+        let requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host.com",
+            title: "This is testing",
+            language: "not valid"
+          }
+        )
+        
+        expect(requestResponse.status).toBe(400)
+        expect(requestResponse.body.message[0].property).toBe("language")
+
+        requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+        expect(requestResponse.status).toBe(201)
+
+        requestResponse = await  request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host-fr.com",
+            title: "This is testing fr",
+            language: "fr"
+          }
+        )
+        console.log(requestResponse.body)
+        expect(requestResponse.status).toBe(201)
+        
+      })
+
     })
+
 
     afterAll(async () => {    
       await db.destroyDatabaseSchema()
