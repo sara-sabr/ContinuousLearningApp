@@ -10,7 +10,7 @@ import {
     
 } from "@nestjs/swagger"
 import {ReturnedLinkDTO} from "./dto/returned-link.dto"
-import {CreateLinkDTO} from "./dto/create-link.dto"
+import {CreateLinkDTO, CreateLinkReturnDTO} from "./dto/create-link.dto"
 import { LinksService } from "./links.service"
 import { type } from "os"
 
@@ -110,6 +110,24 @@ export class LinksController{
     }
 
     @Post()
+    @ApiOperation({
+        tags: ["links"],
+        description: "You take and take and take but never give! I'm adding this route " +
+        "so its not a one way relationship. (you can create links using this route)"
+    })
+    @ApiResponse({
+        status: 201,
+        description: "💃🏽 Nice ! You created a link",
+        type: CreateLinkReturnDTO
+    })
+    @ApiResponse({
+        status: 400,
+        description: "Mistakes happen right? Wrong, we don't accept mistakes here 😡"
+    })
+    @ApiResponse({
+        status: 500,
+        description: "Well know I'm not doing it. Seriously though, we messed up somewhere here"
+    })
     @UsePipes( new ValidationPipe())
     async createLink(@Body() createLinkDTO: CreateLinkDTO){
         return await this.linksService.createLink(createLinkDTO)

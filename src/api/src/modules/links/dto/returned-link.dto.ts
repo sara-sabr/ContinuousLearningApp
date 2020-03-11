@@ -1,19 +1,21 @@
 import {ApiProperty } from "@nestjs/swagger"
+import { url } from "inspector";
+import { format } from "url";
 export class ReturnedLinkDTO {
     @ApiProperty()
     id: number;
-    @ApiProperty()
+    @ApiProperty({format: "url", example: "https://lookatthiscoollink.com"})
     url: string;
-    @ApiProperty()
+    @ApiProperty({example: "Awesome Link"})
     title: string;
-    @ApiProperty()
+    @ApiProperty({enum: ["en", "fr"]})
     language: string;
-    @ApiProperty()
+    @ApiProperty({required: false, example: "Look at this awesome link I found cause I'm awesome"})
     description?: string;
-    @ApiProperty()
+    @ApiProperty({format: "url", required: false, example: "https://imagepage.com/thisisapng.png"})
     imageLink?: string;
-    @ApiProperty()
+    @ApiProperty({readOnly: true})
     createdOn: Date;
-    @ApiProperty()
+    @ApiProperty({readOnly: true})
     updatedOn?: Date;
 }
