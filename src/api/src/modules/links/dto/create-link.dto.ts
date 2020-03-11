@@ -25,7 +25,7 @@ export class CreateLinkDTO{
 
     @IsOptional()
     @IsUrl({
-        require_valid_protocol: true,
+        require_protocol: true,
         require_host: true,
         require_tld: true
     })
