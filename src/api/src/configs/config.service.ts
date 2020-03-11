@@ -52,6 +52,11 @@ export default class ConfigurationService {
             type: "string",
             default: "http://localhost"
         },
+        API_APPLICATION_GLOBAL_PREFIX: {
+            name: "applicationPrefix",
+            type: "string",
+            default: "api"
+        },
         API_APPLICATION_PORT: {
             name: "applicationPort",
             type: "number",

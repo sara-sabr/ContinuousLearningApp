@@ -5,5 +5,6 @@ export interface ConfigurationsInterface{
     databasePassword?: string,
     databaseUser?: string,
     applicationURL?: string,
+    applicationPrefix?: string,
     applicationPort?: number
 }

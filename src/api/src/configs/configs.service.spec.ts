@@ -13,13 +13,19 @@ describe( "ConfigurationService unit tests", () => {
         "API_DATABASE_PORT": 5432,
         "API_DATABASE_USER": "postgres",
         "API_DATABASE_PASSWORD": "postgres",
+        "API_APPLICATION_URL": "http://localhost",
+        "API_APPLICATION_PORT": 3000,
+        "API_APPLICATION_GLOBAL_PREFIX": "api"
     }
     let configurationProduction = {
         "API_DATABASE_NAME": "production db name",
         "API_DATABASE_HOST": "production db host",
         "API_DATABASE_PORT": 5432,
         "API_DATABASE_USER": "production user",
-        "API_DATABASE_PASSWORD": "production password"
+        "API_DATABASE_PASSWORD": "production password",
+        "API_APPLICATION_URL": "http://mysite.com",
+        "API_APPLICATION_PORT": 3000,
+        "API_APPLICATION_GLOBAL_PREFIX": "api"
     }
     const MOCK_FILE_INFO = {}
     MOCK_FILE_INFO[
@@ -106,16 +112,22 @@ describe( "ConfigurationService unit tests", () => {
             it("assigns parsed configs to configs variable", () => {
                 parseFunction.mockRestore()
 
+                let envs = process.env
+                process.env = {}
+                process.env.NODE_ENV = envs.NODE_ENV 
                 let configService = new ConfigurationService()
                 let expectedAppConfigs: ConfigurationsInterface = {
-                    applicationURL: "http://localhost",
-                    applicationPort: 3000,
+                    applicationURL: configurationDevelopment.API_APPLICATION_URL,
+                    applicationPort: configurationDevelopment.API_APPLICATION_PORT,
+                    applicationPrefix: configurationDevelopment.API_APPLICATION_GLOBAL_PREFIX,
                     databaseHost: configurationDevelopment.API_DATABASE_HOST,
                     databasePort: configurationDevelopment.API_DATABASE_PORT,
                     databaseName: configurationDevelopment.API_DATABASE_NAME,
                     databasePassword: configurationDevelopment.API_DATABASE_PASSWORD,
                     databaseUser: configurationDevelopment.API_DATABASE_USER
                 }
+                process.env = envs
+            
                 expect(configService.getApplicationConfigs()).toMatchObject(
                     expectedAppConfigs
                 )
@@ -292,16 +304,21 @@ describe( "ConfigurationService unit tests", () => {
             it("assigns parsed configs to configs variable", () => {
                 parseFunction.mockRestore()
 
+                let envs = process.env
+                process.env = {}
+                process.env.NODE_ENV = envs.NODE_ENV
                 let configService = new ConfigurationService()
                 let expectedAppConfigs: ConfigurationsInterface = {
-                    applicationURL: "http://localhost",
-                    applicationPort: 3000,
+                    applicationURL: configurationProduction.API_APPLICATION_URL,
+                    applicationPort: configurationProduction.API_APPLICATION_PORT,
+                    applicationPrefix: configurationProduction.API_APPLICATION_GLOBAL_PREFIX,
                     databaseHost: configurationProduction.API_DATABASE_HOST,
                     databasePort: configurationProduction.API_DATABASE_PORT,
                     databaseName: configurationProduction.API_DATABASE_NAME,
                     databasePassword: configurationProduction.API_DATABASE_PASSWORD,
                     databaseUser: configurationProduction.API_DATABASE_USER
                 }
+                process.env = envs
                 expect(configService.getApplicationConfigs()).toMatchObject(
                     expectedAppConfigs
                 )
