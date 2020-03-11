@@ -433,6 +433,36 @@ describe('AppController (e2e)', () => {
         }        
         
       })
+
+      it.only("/links (POST)", async () => {
+        let requestResponse = await request(app.getHttpServer()).post(
+          "/links"
+        ).send(
+          {
+            url: "thisisaurl.com",
+            language: "en",
+            title: "this is a title",
+            description: "This is description for a url",
+            imageLink: "thisisaurl.com/something.png",
+
+          }
+        )
+
+        expect(requestResponse.status).toBe(201)
+
+        let dbRow = await db.query(
+          "SELECT * FROM links"
+        )
+
+        expect(dbRow.rowCount).toBe(1)
+
+        expect(dbRow.rows[0].id).toBe(1)
+        expect(dbRow.rows[0].url).toBe("thisisaurl.com")
+        expect(dbRow.rows[0].title).toBe("this is a title")
+        expect(dbRow.rows[0].language).toBe("en")
+        expect(dbRow.rows[0].image_link).toBe("thisisaurl.com/something.png")
+        expect(dbRow.rows[0].description).toBe("This is description for a url")
+      })
     })
 
     afterAll(async () => {    

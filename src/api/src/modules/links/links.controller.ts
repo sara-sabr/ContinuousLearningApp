@@ -112,6 +112,6 @@ export class LinksController{
     @Post()
     @UsePipes( new ValidationPipe())
     async createLink(@Body() createLinkDTO: CreateLinkDTO){
-        return this.linksService.createLink(createLinkDTO)
+        return await this.linksService.createLink(createLinkDTO)
     }
 }
