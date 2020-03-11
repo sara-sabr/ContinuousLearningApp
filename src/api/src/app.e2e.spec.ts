@@ -291,6 +291,50 @@ describe('AppController (e2e)', () => {
         )
       })
 
+      it("offset query parameter /links (GET)", async () => {
+        let link1 = await db.query(
+          "INSERT INTO links (url, title, language, description, image_link) " +
+          "VALUES ('https://test1.com', 'test1', 'en', 'This is a testing site', 'https://test1.com/png') " +
+          "RETURNING *"
+        )
+           
+        let link2 = await db.query(
+          "INSERT INTO links (url, title, language, description, image_link) " +
+          "VALUES ('https://test2.com', 'test2', 'fr', 'This is a testing site', 'https://test2.com/png') " +
+          "RETURNING *"
+        )
+           
+        let link3 = await db.query(
+          "INSERT INTO links (url, title, language, description, image_link) " +
+          "VALUES ('https://test3.com', 'test3', 'fr', 'This is a testing site', 'https://test3.com/png') " +
+          "RETURNING *"
+        )
+        
+        let requestResponse = await request(app.getHttpServer()).get("/links?offset=1")
+        expect(requestResponse.status).toBe(200)
+        expect(requestResponse.body).toHaveLength(2)
+
+        let rowArray = [link2, link3]
+
+        let requestBody = requestResponse.body
+        for (let i = 0; i < rowArray.length; i ++){
+          let row = rowArray[i].rows[0]
+          let link = requestBody[i]
+          expect(link).toMatchObject(
+            {
+              id: row["id"],
+              url: row["url"],
+              language: row["language"],
+              title: row["title"],
+              description: row["description"],
+              imageLink: row["image_link"],
+              createdOn: row["created_on"].toISOString(),
+              updatedOn: row["updated_on"]
+            }
+          )
+        }        
+      })
+
     })
     afterAll( async () => {
       await db.destroyDatabaseSchema()
