@@ -60,7 +60,7 @@ export default class ConfigurationService {
         API_APPLICATION_PORT: {
             name: "applicationPort",
             type: "number",
-            default: 3000
+            default: 4000
         }
     }
 
