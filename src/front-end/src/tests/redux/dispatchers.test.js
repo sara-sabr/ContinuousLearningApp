@@ -211,7 +211,7 @@ describe("dispatcher tests", () => {
             )
         })
 
-        it("dispatches request failure action on INTERNAL ERROR", () => {
+        it("dispatches request failure action on INTERNAL ERROR json", () => {
             fetchMock.getOnce(
                 "/api/links?order=asc",
                 {
@@ -246,6 +246,137 @@ describe("dispatcher tests", () => {
                 }
             )
         })
+
+        it("dipatches request failure action on INTERNAL ERROR text", () => {
+            fetchMock.getOnce(
+                "/api/links?order=asc",
+                {
+                    body: "internal error",
+                    headers: {
+                        "content-type": "text/plain"
+                    },
+                    status: 500
+                }
+            )
+
+            let expectedActions =[
+                action.requestLinksCreator(),
+                action.recieveLinksFailedCreator(
+                    action.REQUEST_FAILURE_TYPES.SERVER_ERROR,
+                    "internal error"
+                )
+            ]
+
+            return store.dispatch(
+                dispatchers.fetchLinks()
+            ).then(
+                () => {
+                    expect(consoleErrorMock.mock.calls.length).toBe(1)
+                    expect(store.getActions()).toEqual(
+                        expectedActions
+                    )
+                }
+            )
+        })
+
+        it("dispatches request failure action on INTERNAL ERROR unknown type", () => {
+            fetchMock.getOnce(
+                "/api/links?order=asc",
+                {
+                    status: 500
+                }
+            )
+            let expectedActions =[
+                action.requestLinksCreator(),
+                action.recieveLinksFailedCreator(
+                    action.REQUEST_FAILURE_TYPES.SERVER_ERROR
+                )
+            ]
+
+            return store.dispatch(
+                dispatchers.fetchLinks()
+            ).then(
+                () => {
+                    expect(consoleErrorMock.mock.calls.length).toBe(1)
+                    expect(store.getActions()).toEqual(
+                        expectedActions
+                    )
+                }
+            )
+        })
+
+        it("dispatches request failure action on BAD REQUEST message string", () => {
+            fetchMock.getOnce(
+                "/api/links?order=asc",
+                {
+                    status: 400,
+                    body: {
+                        status: 400,
+                        message: "bad request"
+                    },
+                    headers: {
+                        "content-type": "application/json"
+                    } 
+                }
+            )
+
+            let expectedActions = [
+                action.requestLinksCreator(),
+                action.recieveLinksFailedCreator(
+                    action.REQUEST_FAILURE_TYPES.BAD_REQUEST,
+                    "bad request"
+                )
+            ]
+
+            return store.dispatch(
+                dispatchers.fetchLinks()
+            ).then(
+                () => {
+                    expect(consoleErrorMock.mock.calls.length).toBe(1)
+                    expect(store.getActions()).toEqual(
+                        expectedActions
+                    )
+                }
+            )
+        })
+
+        it("dispatches request failure action on BAD REQUEST message json", () => {
+            fetchMock.getOnce(
+                "/api/links?order=asc",
+                {
+                    status: 400,
+                    body: {
+                        status: 400,
+                        message: {
+                            someKey: "someValue"
+                        }
+                    },
+                    headers: {
+                        "content-type": "application/json"
+                    } 
+                }
+            )
+
+            let expectedActions = [
+                action.requestLinksCreator(),
+                action.recieveLinksFailedCreator(
+                    action.REQUEST_FAILURE_TYPES.BAD_REQUEST,
+                    '{"someKey":"someValue"}'
+                )
+            ]
+
+            return store.dispatch(
+                dispatchers.fetchLinks()
+            ).then(
+                () => {
+                    expect(consoleErrorMock.mock.calls.length).toBe(1)
+                    expect(store.getActions()).toEqual(
+                        expectedActions
+                    )
+                }
+            )
+        })
+
 
         afterEach(() => {
             variables.apiURL = apiURL

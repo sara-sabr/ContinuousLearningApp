@@ -98,8 +98,30 @@ async function fetchLinksData(dispatch, options = {
 
         }
         else if (results.status >= 400 && results.status < 500){
-            let message = await results.json().message
-            console.error("BAD REQUEST: " + message)
+            let responseBody = await results.json()
+            let responseMessage = responseBody.message
+            let message 
+            if (responseMessage){
+                if(typeof responseMessage === "object"){
+                    message = JSON.stringify(responseMessage)
+                    console.error("BAD REQUEST: " +message)
+                }
+                else if( typeof responseMessage === "string"){
+                    message = responseMessage
+                    console.error("BAD REQUEST: " + message)
+                }
+                else{
+                    if(responseBody){
+                        console.error("BAD REQUEST: " + JSON.stringify(responseBody))
+                    }
+                    else{
+                        console.error("BAD REQUEST")
+                    }
+                }
+            }
+            else{
+                console.error("BAD REQUEST")
+            }
             dispatch(
                 actions.recieveLinksFailedCreator(
                     actions.REQUEST_FAILURE_TYPES.BAD_REQUEST,
