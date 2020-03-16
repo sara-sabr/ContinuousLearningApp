@@ -14,7 +14,7 @@ describe( "ConfigurationService unit tests", () => {
         "API_DATABASE_USER": "postgres",
         "API_DATABASE_PASSWORD": "postgres",
         "API_APPLICATION_URL": "http://localhost",
-        "API_APPLICATION_PORT": 3000,
+        "API_APPLICATION_PORT": 4000,
         "API_APPLICATION_GLOBAL_PREFIX": "api"
     }
     let configurationProduction = {
@@ -24,7 +24,7 @@ describe( "ConfigurationService unit tests", () => {
         "API_DATABASE_USER": "production user",
         "API_DATABASE_PASSWORD": "production password",
         "API_APPLICATION_URL": "http://mysite.com",
-        "API_APPLICATION_PORT": 3000,
+        "API_APPLICATION_PORT": 4000,
         "API_APPLICATION_GLOBAL_PREFIX": "api"
     }
     const MOCK_FILE_INFO = {}
@@ -146,7 +146,7 @@ describe( "ConfigurationService unit tests", () => {
             )
             let expectedApplicationConfigs: ConfigurationsInterface = {
                 applicationURL: "http://localhost",
-                applicationPort: 3000,
+                applicationPort: 4000,
                 databaseName: configurationDevelopment.API_DATABASE_NAME,
                 databaseHost: configurationDevelopment.API_DATABASE_HOST,
                 databasePort: configurationDevelopment.API_DATABASE_PORT,
@@ -165,7 +165,7 @@ describe( "ConfigurationService unit tests", () => {
             )
             let expectedApplicationConfigs: ConfigurationsInterface = {
                 applicationURL: "http://localhost",
-                applicationPort: 3000,
+                applicationPort: 4000,
                 databaseName: configurationDevelopment.API_DATABASE_NAME,
                 databaseHost: configurationDevelopment.API_DATABASE_HOST,
                 databasePort: configurationDevelopment.API_DATABASE_PORT,
@@ -189,7 +189,7 @@ describe( "ConfigurationService unit tests", () => {
 
            let expectedApplicationConfigs: ConfigurationsInterface = {
                applicationURL: "http://localhost",
-               applicationPort: 3000,
+               applicationPort: 4000,
                databaseName: configurationDevelopmentDif.API_DATABASE_NAME,
                databaseHost: configurationDevelopment.API_DATABASE_HOST,
                databasePort: configurationDevelopment.API_DATABASE_PORT,
@@ -237,7 +237,7 @@ describe( "ConfigurationService unit tests", () => {
                 databaseUser: "postgres",
                 databasePassword: "postgres",
                 applicationURL: "http://localhost",
-                applicationPort: 3000
+                applicationPort: 4000
             }
 
             let appConfigs = ConfigurationService.parseIntoApplicationConfigs(
