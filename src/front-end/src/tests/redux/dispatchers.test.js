@@ -378,6 +378,99 @@ describe("dispatcher tests", () => {
         })
 
 
+        it("dispatches request failure action on BAD REQUEST json but no message", () => {
+            fetchMock.getOnce(
+                "/api/links?order=asc",
+                {
+                    body: {
+                        status: 400
+                    },
+                    headers: {
+                        "content-type": "application/json"
+                    },
+                    status: 400
+                }
+            )
+
+            let expectedActions = [
+                action.requestLinksCreator(),
+                action.recieveLinksFailedCreator(
+                    action.REQUEST_FAILURE_TYPES.BAD_REQUEST,
+                    '{"status":400}'
+                )
+            ]
+
+            return store.dispatch(
+                dispatchers.fetchLinks()
+            ).then(
+                () => {
+                    expect(consoleErrorMock.mock.calls.length).toBe(1)
+                    expect(store.getActions()).toEqual(
+                        expectedActions
+                    )
+                }
+            )
+        })
+
+        it("dispatches request failure action on BAD_REQUEST non json", () =>{
+            fetchMock.getOnce(
+                "/api/links?order=asc",
+                {
+                    status: 400
+                }
+            )
+
+            let expectedActions = [
+                action.requestLinksCreator(),
+                action.recieveLinksFailedCreator(
+                    action.REQUEST_FAILURE_TYPES.BAD_REQUEST
+                )
+            ]
+
+            return store.dispatch(
+                dispatchers.fetchLinks()
+            ).then(
+                () => {
+                    expect(consoleErrorMock.mock.calls)
+                    expect(store.getActions()).toEqual(
+                        expectedActions
+                    )
+                }
+            )
+        })
+
+        it("dispatches request failure action on NETWORK ERROR", () => {
+            
+            fetchMock.getOnce(
+                "/api/links?order=asc",
+                {
+                    throws: new Error("could not connect to server")
+                }
+            )
+
+            let expectedActions = [
+                action.requestLinksCreator(),
+                action.recieveLinksFailedCreator(
+                    action.REQUEST_FAILURE_TYPES.NETWORK_ERROR,
+                    "could not connect to server"
+                )
+            ]
+
+            return store.dispatch(
+                dispatchers.fetchLinks()
+            ).then( 
+                () => {
+                    expect(consoleErrorMock.mock.calls.length).toBe(1)
+                    expect(
+                        store.getActions()
+                    ).toEqual(expectedActions)
+                }
+                
+            )
+        })
+
+
+
         afterEach(() => {
             variables.apiURL = apiURL
             consoleErrorMock.mockRestore()

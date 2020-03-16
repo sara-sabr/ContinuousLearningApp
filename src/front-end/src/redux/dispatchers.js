@@ -98,10 +98,14 @@ async function fetchLinksData(dispatch, options = {
 
         }
         else if (results.status >= 400 && results.status < 500){
-            let responseBody = await results.json()
-            let responseMessage = responseBody.message
+            let responseBody
+            let responseMessage
+            try{
+                responseBody = await results.json()
+                responseMessage = responseBody.message
+            }catch(e){}
             let message 
-            if (responseMessage){
+            if (responseBody){
                 if(typeof responseMessage === "object"){
                     message = JSON.stringify(responseMessage)
                     console.error("BAD REQUEST: " +message)
@@ -111,13 +115,9 @@ async function fetchLinksData(dispatch, options = {
                     console.error("BAD REQUEST: " + message)
                 }
                 else{
-                    if(responseBody){
-                        console.error("BAD REQUEST: " + JSON.stringify(responseBody))
-                    }
-                    else{
-                        console.error("BAD REQUEST")
-                    }
-                }
+                    message = JSON.stringify(responseBody)
+                    console.error("BAD REQUEST: " + JSON.stringify(responseBody))
+                }       
             }
             else{
                 console.error("BAD REQUEST")
