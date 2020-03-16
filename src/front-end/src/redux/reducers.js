@@ -39,6 +39,9 @@ export const links = function(state = {
                 case RESOURCE_TYPES.LINKS:
                     let currentLinks = Object.assign({}, state.data)
                     let fetchedLinks = {}
+                    let newLinks = {}
+                    let sortedData = []
+
                     action.data.map(
                         (val) => {
                             fetchedLinks[val.id] = val
@@ -46,23 +49,63 @@ export const links = function(state = {
                     )
 
                     if (Object.keys(currentLinks).length >= 1){
-                        fetchedLinks = {
+                        newLinks = {
                             ...currentLinks,
                             ...fetchedLinks
                         }
-                    }
-                    else{
-                        let newState = {
-                            ...state,
-                            isFetching: false,
-                            fetchFailed: false,
-                            failureReason: undefined,
-                            failureMessage: undefined,
-                            data: fetchedLinks
+                        let createdOnKeyMapUnsorted = {}
+
+                        for (let i in newLinks){
+                            let createdOn = newLinks[i].createdOn
+                            if(createdOnKeyMapUnsorted[createdOn]){
+                                createdOnKeyMapUnsorted[createdOn].push(
+                                    newLinks[i]
+                                )
+                            }
+                            else{
+                                createdOnKeyMapUnsorted[createdOn] = [newLinks[i]]
+                            }
+
                         }
 
-                        return newState
+                        if (state.previousQueryParams && state.previousQueryParams.order === "desc"){
+                            let sortedCreatedOnKeys = Object.keys(createdOnKeyMapUnsorted).sort(
+                                (a, b ) => {
+                                    if (a > b){
+                                        return -1
+                                    }
+                                    else if (a === b){
+                                        return 0
+                                    }
+                                    return 1 
+                                }
+                            )
+
+                            for (let i in sortedCreatedOnKeys){
+                                sortedData.concat(createdOnKeyMapUnsorted[sortedCreatedOnKeys[i]])
+                            }
+
+                        }
+
+
                     }
+                    else{
+                        newLinks = fetchedLinks
+                        sortedData = state.data
+                    }
+                
+                    let newState = {
+                        ...state,
+                        isFetching: false,
+                        fetchFailed: false,
+                        failureReason: undefined,
+                        failureMessage: undefined,
+                        data: fetchedLinks,
+                        sortedData: sortedData
+                    }
+
+                    return newState
+                    
                     
                 default:
                     return state
