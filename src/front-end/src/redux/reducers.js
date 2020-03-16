@@ -81,7 +81,7 @@ export const links = function(state = {
                         fetchFailed: false,
                         failureReason: undefined,
                         failureMessage: undefined,
-                        data: fetchedLinks,
+                        data: newLinks,
                         sortedData: sortedData
                     }
 
