@@ -2,6 +2,7 @@ import { combineReducers, bindActionCreators } from "redux"
 import {TYPES, RESOURCE_TYPES } from "./actions"
 import i18n from "../translations" 
 import { act } from "react-dom/test-utils"
+import { sortBasedOnKeys, sortBasedOnKey } from "./utils"
 
 
 export const language = function(state = i18n.language, action){
@@ -16,7 +17,10 @@ export const language = function(state = i18n.language, action){
 export const links = function(state = {
     isFetching: false,
     fetchFailed: false,
-    data: {}
+    order: "asc",
+    orderBy: "createdOn",
+    data: {},
+    sortedData: []
 }, action){
     switch (action.type){
         case TYPES.REQUEST:
@@ -25,6 +29,7 @@ export const links = function(state = {
                     return {
                         ...state,
                         isFetching: true,
+                        fetchFailed: false,
                         previousQueryParams: {
                             order: action.order,
                             limit: action.limit,
@@ -53,45 +58,21 @@ export const links = function(state = {
                             ...currentLinks,
                             ...fetchedLinks
                         }
-                        let createdOnKeyMapUnsorted = {}
-
-                        for (let i in newLinks){
-                            let createdOn = newLinks[i].createdOn
-                            if(createdOnKeyMapUnsorted[createdOn]){
-                                createdOnKeyMapUnsorted[createdOn].push(
-                                    newLinks[i]
-                                )
-                            }
-                            else{
-                                createdOnKeyMapUnsorted[createdOn] = [newLinks[i]]
-                            }
-
-                        }
-
-                        if (state.previousQueryParams && state.previousQueryParams.order === "desc"){
-                            let sortedCreatedOnKeys = Object.keys(createdOnKeyMapUnsorted).sort(
-                                (a, b ) => {
-                                    if (a > b){
-                                        return -1
-                                    }
-                                    else if (a === b){
-                                        return 0
-                                    }
-                                    return 1 
-                                }
-                            )
-
-                            for (let i in sortedCreatedOnKeys){
-                                sortedData.concat(createdOnKeyMapUnsorted[sortedCreatedOnKeys[i]])
-                            }
-
-                        }
-
+                        sortedData = sortBasedOnKey(
+                            Object.values(newLinks),
+                            state.orderBy,
+                            state.order
+                        )
+                    
 
                     }
                     else{
                         newLinks = fetchedLinks
-                        sortedData = state.data
+                        sortedData =  sortBasedOnKey(
+                            Object.values(newLinks),
+                            state.orderBy,
+                            state.order
+                        )
                     }
                 
                     let newState = {
