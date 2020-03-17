@@ -205,7 +205,30 @@ describe("reducer tests", () => {
             expect(returnedResult.sortedData).toEqual(
                 sortedData
             )
+        })
 
+        it("it handles request failure action", () => {
+            let returnedResult = reducers.links(
+                undefined, action.recieveLinksFailedCreator(
+                    action.REQUEST_FAILURE_TYPES.BAD_REQUEST,
+                    "something bad happened"
+                )
+            )
+
+            expect(
+                returnedResult
+            ).toEqual(
+                {
+                    isFetching: false,
+                    fetchFailed: true,
+                    order: "asc",
+                    orderBy: "createdOn",
+                    failureReason: action.REQUEST_FAILURE_TYPES.BAD_REQUEST,
+                    failureMessage: "something bad happened",
+                    data: {},
+                    sortedData: []
+                }
+            )
         })
     })
 

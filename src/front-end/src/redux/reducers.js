@@ -104,6 +104,28 @@ export const links = function(state = {
                 default:
                     return state
             }
+        case TYPES.CHANGE_ORDER:
+            switch(action.resourceType){
+                case RESOURCE_TYPES.LINKS:
+                    if (action.order === state.order && action.orderBy === state.orderBy){
+                        return state
+                    }
+                    else{
+                        sortedData = sortBasedOnKey(
+                            Object.values(state.data),
+                            action.orderBy,
+                            action.order
+                        )
+                        return {
+                            ...state,
+                            order: action.order,
+                            orderBy: action.orderBy,
+                            sortedData: sortedData
+                        }
+                    }
+                default:
+                    return state
+            }
         default:
             return state
     }

@@ -32,6 +32,17 @@ export const changeLanguage = function(language, dispatcher){
     }
 }
 
+export const changeOrder = function(dispatcher, order, orderBy = undefined){
+    if(order !== actions.ORDER.ASC && order !== actions.ORDER.DESC){
+        console.error(`ERROR: order is not valid order must be either ${Object.values(actions.ORDER).join(", ")}`)
+    }
+    else{
+        dispatcher(actions.changeLinksOrder(
+            orderBy, order
+        ))
+    }
+}
+
 function shouldFetchLinks(state){
     if (state.isFetching){
         return false 

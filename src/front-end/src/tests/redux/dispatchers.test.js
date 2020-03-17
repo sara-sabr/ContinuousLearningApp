@@ -476,7 +476,36 @@ describe("dispatcher tests", () => {
             consoleErrorMock.mockRestore()
         })
         
-    }) 
+    })
+    
+    describe("changeOrder", () => {
+        let consoleErrorMock
+        beforeEach(() => {
+            consoleErrorMock = jest.spyOn(console, "error")
+            consoleErrorMock.mockImplementation((...args) => {})
+        })
+        it("does not dispatch when order is invalid", () => {
+            dispatchers.changeOrder(mockedDispatchFunc, "BAD_ORDER")
+            
+            expect(mockedDispatchFunc.mock.calls.length).toBe(0)
+            expect(consoleErrorMock.mock.calls.length).toBe(1)
+            expect(consoleErrorMock.mock.calls[0][0]).toBe(
+                `ERROR: order is not valid order must be either ${Object.values(action.ORDER).join(", ")}`
+            )
+        })
+        it("dispatches change order action", () => {
+            dispatchers.changeOrder(mockedDispatchFunc, action.ORDER.ASC, "createdOn")
+            expect(mockedDispatchFunc.mock.calls.length).toBe(1)
+            expect(mockedDispatchFunc.mock.calls[0][0]).toEqual(
+                action.changeLinksOrder(
+                    "createdOn", action.ORDER.ASC
+                )
+            )
+        })
+        afterEach(() => {
+            consoleErrorMock.mockRestore()
+        })
+    })
     afterEach(() => {
       spiedOnLocalStorageSet.mockRestore()
       spiedOnLocalStorageGet.mockRestore()

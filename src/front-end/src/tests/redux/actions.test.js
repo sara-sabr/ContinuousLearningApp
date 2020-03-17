@@ -111,4 +111,20 @@ describe("actions", () => {
             }
         )
     })
+
+    it("changeLinksOrder", () => {
+        let expectedAction = actions.changeLinksOrder(
+            "aField",
+            actions.ORDER.DESC
+        )
+
+        expect(expectedAction).toEqual(
+            {
+                type: actions.TYPES.CHANGE_ORDER,
+                resourceType: actions.RESOURCE_TYPES.LINKS,
+                orderBy: "aField",
+                order: actions.ORDER.DESC
+            }
+        )
+    })
 })
