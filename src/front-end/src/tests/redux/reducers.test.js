@@ -1,5 +1,6 @@
 import * as reducers from "../../redux/reducers"
 import * as action from "../../redux/actions"
+
 import i18n from "../../translations"
 import { shuffleArray } from "../utils"
 
@@ -229,6 +230,114 @@ describe("reducer tests", () => {
                     sortedData: []
                 }
             )
+        })
+
+        it("handles CHANGE_ORDER action with change in order", () => {
+            let state = {
+                isFetching: false,
+                fetchFailed: false,
+                order: "asc",
+                orderBy: "createdOn",
+                data: {
+                    1: sortedData[0],
+                    2: sortedData[1],
+                    3: sortedData[2],
+                    4: sortedData[3],
+                    5: sortedData[4]
+                },
+                sortedData: sortedData
+            }
+
+            let returnedResult = reducers.links(
+                state,
+                action.changeLinksOrder(
+                    undefined, action.ORDER.DESC
+                )
+            )
+
+            let expectedArray = Object.assign([], sortedData).reverse()
+            expect(returnedResult.sortedData).toEqual(
+                expectedArray
+            )
+        })
+        it("handles CHANGE_ORDER action with order and orderBy", () => {
+            let state = {
+                isFetching: false,
+                fetchFailed: false,
+                order: "asc",
+                orderBy: "createdOn",
+                data: {
+                    1: sortedData[0],
+                    2: sortedData[1],
+                    3: sortedData[2],
+                    4: sortedData[3],
+                    5: sortedData[4]
+                },
+                sortedData: sortedData
+            }
+
+            let expectedArray = [
+                sortedData[0], sortedData[4],
+                sortedData[1], sortedData[2],
+                sortedData[3]
+            ]
+
+            let recievedResults = reducers.links(
+                state,
+                action.changeLinksOrder(
+                    "language",
+                    action.ORDER.ASC
+                )
+            )
+
+            expect(recievedResults.sortedData).toEqual(
+                expectedArray
+            )
+        })
+
+        it("returns state if order and orderedBy does not change", () => {
+            let state = {
+                isFetching: false,
+                fetchFailed: false,
+                order: "asc",
+                orderBy: "createdOn",
+                data: {
+                    1: sortedData[0],
+                    2: sortedData[1],
+                    3: sortedData[2],
+                    4: sortedData[3],
+                    5: sortedData[4]
+                },
+                sortedData: sortedData
+            }
+
+            let recievedResults = reducers.links(
+                state,
+                action.changeLinksOrder(
+                    "createdOn",
+                    action.ORDER.ASC
+                )
+            )
+
+            expect(recievedResults.sortedData).toEqual(
+                sortedData
+            )
+            expect(recievedResults.order).toEqual("asc")
+            expect(recievedResults.orderBy).toEqual("createdOn")
+
+            recievedResults = reducers.links(
+                state,
+                action.changeLinksOrder(
+                    undefined,
+                    action.ORDER.ASC
+                )
+            )
+            
+            expect(recievedResults.sortedData).toEqual(
+                sortedData
+            )
+            expect(recievedResults.order).toEqual("asc")
+            expect(recievedResults.orderBy).toEqual("createdOn")
         })
     })
 
