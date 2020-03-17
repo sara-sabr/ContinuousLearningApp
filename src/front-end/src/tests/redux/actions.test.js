@@ -113,7 +113,7 @@ describe("actions", () => {
     })
 
     it("changeLinksOrder", () => {
-        let expectedAction = actions.changeLinksOrder(
+        let expectedAction = actions.changeLinksOrderCreator(
             "aField",
             actions.ORDER.DESC
         )

@@ -34,6 +34,8 @@ export const changeLanguageCreator = function(language){
     }
 }
 
+
+/* LINKS ACTIONS */
 export const requestLinksCreator = function(options = {
     limit: undefined,
     offset: undefined,
@@ -71,7 +73,7 @@ export const recieveLinksFailedCreator = function(failureReason, message){
     }
 }
 
-export const changeLinksOrder = function(orderBy=undefined, order){
+export const changeLinksOrderCreator = function(orderBy=undefined, order){
     return {
         type: TYPES.CHANGE_ORDER,
         resourceType: RESOURCE_TYPES.LINKS,
@@ -79,3 +81,7 @@ export const changeLinksOrder = function(orderBy=undefined, order){
         order
     }
 }
+
+/* SUBMIT ACTIONS */
+
+export const create

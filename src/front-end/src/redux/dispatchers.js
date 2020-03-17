@@ -37,7 +37,7 @@ export const changeOrder = function(dispatcher, order, orderBy = undefined){
         console.error(`ERROR: order is not valid order must be either ${Object.values(actions.ORDER).join(", ")}`)
     }
     else{
-        dispatcher(actions.changeLinksOrder(
+        dispatcher(actions.changeLinksOrderCreator(
             orderBy, order
         ))
     }
