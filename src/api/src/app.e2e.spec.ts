@@ -54,19 +54,19 @@ describe('AppController (e2e)', () => {
       it("/links/:id (GET)", async () => {
         let link1 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test1.com', 'test1', 'en', 'This is a testing site', 'https://test1.com/png') " +
+          "VALUES ('test1.com', 'test1', 'en', 'This is a testing site', 'test1.com/png') " +
           "RETURNING *"
         )
     
         let link2 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test2.com', 'test2', 'fr', 'This is a testing site', 'https://test2.com/png') " +
+          "VALUES ('test2.com', 'test2', 'fr', 'This is a testing site', 'test2.com/png') " +
           "RETURNING *"
         )
     
         let link3 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test3.com', 'test3', 'fr', 'This is a testing site', 'https://test3.com/png') " +
+          "VALUES ('test3.com', 'test3', 'fr', 'This is a testing site', 'test3.com/png') " +
           "RETURNING *"
         )
     
@@ -151,19 +151,19 @@ describe('AppController (e2e)', () => {
       it("/links (GET)", async () => {
         let link1 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test1.com', 'test1', 'en', 'This is a testing site', 'https://test1.com/png') " +
+          "VALUES ('test1.com', 'test1', 'en', 'This is a testing site', 'test1.com/png') " +
           "RETURNING *"
         )
     
         let link2 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test2.com', 'test2', 'fr', 'This is a testing site', 'https://test2.com/png') " +
+          "VALUES ('test2.com', 'test2', 'fr', 'This is a testing site', 'test2.com/png') " +
           "RETURNING *"
         )
     
         let link3 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test3.com', 'test3', 'fr', 'This is a testing site', 'https://test3.com/png') " +
+          "VALUES ('test3.com', 'test3', 'fr', 'This is a testing site', 'test3.com/png') " +
           "RETURNING *"
         )
 
@@ -233,19 +233,19 @@ describe('AppController (e2e)', () => {
       it("order query parameter /links (GET)", async () => {
         let link1 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test1.com', 'test1', 'en', 'This is a testing site', 'https://test1.com/png') " +
+          "VALUES ('test1.com', 'test1', 'en', 'This is a testing site', 'test1.com/png') " +
           "RETURNING *"
         )
            
         let link2 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test2.com', 'test2', 'fr', 'This is a testing site', 'https://test2.com/png') " +
+          "VALUES ('test2.com', 'test2', 'fr', 'This is a testing site', 'test2.com/png') " +
           "RETURNING *"
         )
            
         let link3 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test3.com', 'test3', 'fr', 'This is a testing site', 'https://test3.com/png') " +
+          "VALUES ('test3.com', 'test3', 'fr', 'This is a testing site', 'test3.com/png') " +
           "RETURNING *"
         )
 
@@ -286,19 +286,19 @@ describe('AppController (e2e)', () => {
       it("offset query parameter /links (GET)", async () => {
         let link1 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test1.com', 'test1', 'en', 'This is a testing site', 'https://test1.com/png') " +
+          "VALUES ('test1.com', 'test1', 'en', 'This is a testing site', 'test1.com/png') " +
           "RETURNING *"
         )
            
         let link2 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test2.com', 'test2', 'fr', 'This is a testing site', 'https://test2.com/png') " +
+          "VALUES ('test2.com', 'test2', 'fr', 'This is a testing site', 'test2.com/png') " +
           "RETURNING *"
         )
            
         let link3 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test3.com', 'test3', 'fr', 'This is a testing site', 'https://test3.com/png') " +
+          "VALUES ('test3.com', 'test3', 'fr', 'This is a testing site', 'test3.com/png') " +
           "RETURNING *"
         )
         
@@ -338,19 +338,19 @@ describe('AppController (e2e)', () => {
       it("limit query parameter /links (GET)", async () => {
         let link1 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test1.com', 'test1', 'en', 'This is a testing site', 'https://test1.com/png') " +
+          "VALUES ('test1.com', 'test1', 'en', 'This is a testing site', 'test1.com/png') " +
           "RETURNING *"
         )
            
         let link2 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test2.com', 'test2', 'fr', 'This is a testing site', 'https://test2.com/png') " +
+          "VALUES ('test2.com', 'test2', 'fr', 'This is a testing site', 'test2.com/png') " +
           "RETURNING *"
         )
            
         let link3 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test3.com', 'test3', 'fr', 'This is a testing site', 'https://test3.com/png') " +
+          "VALUES ('test3.com', 'test3', 'fr', 'This is a testing site', 'test3.com/png') " +
           "RETURNING *"
         )
       
@@ -391,19 +391,19 @@ describe('AppController (e2e)', () => {
       it("order, limit and offset query parameters /links (GET)", async () => {
         let link1 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test1.com', 'test1', 'en', 'This is a testing site', 'https://test1.com/png') " +
+          "VALUES ('test1.com', 'test1', 'en', 'This is a testing site', 'test1.com/png') " +
           "RETURNING *"
         )
            
         let link2 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test2.com', 'test2', 'fr', 'This is a testing site', 'https://test2.com/png') " +
+          "VALUES ('test2.com', 'test2', 'fr', 'This is a testing site', 'test2.com/png') " +
           "RETURNING *"
         )
            
         let link3 = await db.query(
           "INSERT INTO links (url, title, language, description, image_link) " +
-          "VALUES ('https://test3.com', 'test3', 'fr', 'This is a testing site', 'https://test3.com/png') " +
+          "VALUES ('test3.com', 'test3', 'fr', 'This is a testing site', 'test3.com/png') " +
           "RETURNING *"
         )
 
@@ -439,11 +439,11 @@ describe('AppController (e2e)', () => {
           "/links"
         ).send(
           {
-            url: "https://thisisaurl.com",
+            url: "thisisaurl.com",
             language: "en",
             title: "this is a title",
             description: "This is description for a url",
-            imageLink: "https://thisisaurl.com/something.png",
+            imageLink: "thisisaurl.com/something.png",
 
           }
         )
@@ -457,10 +457,10 @@ describe('AppController (e2e)', () => {
         expect(dbRow.rowCount).toBe(1)
 
         expect(dbRow.rows[0].id).toBe(1)
-        expect(dbRow.rows[0].url).toBe("https://thisisaurl.com")
+        expect(dbRow.rows[0].url).toBe("thisisaurl.com")
         expect(dbRow.rows[0].title).toBe("this is a title")
         expect(dbRow.rows[0].language).toBe("en")
-        expect(dbRow.rows[0].image_link).toBe("https://thisisaurl.com/something.png")
+        expect(dbRow.rows[0].image_link).toBe("thisisaurl.com/something.png")
         expect(dbRow.rows[0].description).toBe("This is description for a url")
       })
       it("Internal Error for DatabaseError /links (POST)", async () => {
@@ -477,11 +477,11 @@ describe('AppController (e2e)', () => {
           "/links"
         ).send(
           {
-            url: "https://thisisaurl.com",
+            url: "thisisaurl.com",
             language: "en",
             title: "this is a title",
             description: "This is description for a url",
-            imageLink: "https://thisisaurl.com/something.png",
+            imageLink: "thisisaurl.com/something.png",
 
           }
         )
@@ -509,11 +509,11 @@ describe('AppController (e2e)', () => {
           "/links"
         ).send(
           {
-            url: "https://thisisaurl.com",
+            url: "thisisaurl.com",
             language: "en",
             title: "this is a title",
             description: "This is description for a url",
-            imageLink: "https://thisisaurl.com/something.png",
+            imageLink: "thisisaurl.com/something.png",
         
           }
         )
@@ -531,7 +531,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://testing.com",
+            url: "testing.com",
             title: "This is testing",
             language: "en"
           }
@@ -558,7 +558,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://aurlhasnowbeenincluded.com",
+            url: "aurlhasnowbeenincluded.com",
             title: "This is testing",
             language: "en"
           }
@@ -567,39 +567,12 @@ describe('AppController (e2e)', () => {
         expect(requestResponse.status).toBe(201)
       })
 
-      it("url field should have a protocol /links (POST)", async () => {
-        let requestResponse = await  request(app.getHttpServer())
-        .post("/links")
-        .send(
-          {
-            url: "noprotocol.com",
-            title: "This is testing",
-            language: "en"
-          }
-        )
-
-        expect(requestResponse.status).toBe(400)
-        expect(requestResponse.body.message[0].property).toBe("url")
-
-        requestResponse = await  request(app.getHttpServer())
-        .post("/links")
-        .send(
-          {
-            url: "https://noprotocol.com",
-            title: "This is testing",
-            language: "en"
-          }
-        )
-
-        expect(requestResponse.status).toBe(201)
-      })
-
       it("url field should have a host /links (POST)", async () => {
         let requestResponse = await  request(app.getHttpServer())
         .post("/links")
         .send(
           {
-            url: "https://.com",
+            url: ".com",
             title: "This is testing",
             language: "en"
           }
@@ -612,7 +585,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "en"
           }
@@ -626,7 +599,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host",
+            url: "host",
             title: "This is testing",
             language: "en"
           }
@@ -639,7 +612,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "en"
           }
@@ -653,7 +626,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             language: "en"
           }
         )
@@ -665,7 +638,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "en"
           }
@@ -678,7 +651,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "",
             language: "en"
           }
@@ -691,7 +664,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "en"
           }
@@ -705,7 +678,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing"
           }
         )
@@ -717,7 +690,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "en"
           }
@@ -730,7 +703,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "not valid"
           }
@@ -743,7 +716,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "en"
           }
@@ -754,7 +727,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host-fr.com",
+            url: "host-fr.com",
             title: "This is testing fr",
             language: "fr"
           }
@@ -768,7 +741,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "en",
             description:""
@@ -782,7 +755,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "en",
             description:"this is a description"
@@ -792,36 +765,6 @@ describe('AppController (e2e)', () => {
         expect(requestResponse.status).toBe(201)
       })
 
-      it("imageLink should have a protocol /links (POST)", async () => {
-
-        let requestResponse = await request(app.getHttpServer())
-        .post("/links")
-        .send(
-          {
-            url: "https://host.com",
-            title: "This is testing",
-            language: "en",
-            imageLink: "host.com/thisisaimage.png"
-          }
-        )
-
-        expect(requestResponse.status).toBe(400)
-        expect(requestResponse.body.message[0].property).toBe("imageLink")
-
-        requestResponse = await request(app.getHttpServer())
-        .post("/links")
-        .send(
-          {
-            url: "https://host.com",
-            title: "This is testing",
-            language: "en",
-            imageLink: "https://host.com/thisisaimage.png"
-          }
-        )
-
-        expect(requestResponse.status).toBe(201)
-
-      })
 
       it("imageLink should have a host /links (POST)", async () => {
 
@@ -829,10 +772,10 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "en",
-            imageLink: "https://.com/thisisaimage.png"
+            imageLink: ".com/thisisaimage.png"
           }
         )
       
@@ -843,10 +786,10 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "en",
-            imageLink: "https://host.com/thisisaimage.png"
+            imageLink: "host.com/thisisaimage.png"
           }
         )
       
@@ -860,10 +803,10 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "en",
-            imageLink: "https://host/thisisaimage.png"
+            imageLink: "host/thisisaimage.png"
           }
         )
       
@@ -874,10 +817,10 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "https://host.com",
+            url: "host.com",
             title: "This is testing",
             language: "en",
-            imageLink: "https://host.com/thisisaimage.png"
+            imageLink: "host.com/thisisaimage.png"
           }
         )
       

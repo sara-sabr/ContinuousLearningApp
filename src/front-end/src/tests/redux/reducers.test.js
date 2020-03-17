@@ -284,7 +284,7 @@ describe("reducer tests", () => {
 
             let recievedResults = reducers.links(
                 state,
-                action.changeLinksOrder(
+                action.changeLinksOrderCreator(
                     "language",
                     action.ORDER.ASC
                 )
@@ -313,7 +313,7 @@ describe("reducer tests", () => {
 
             let recievedResults = reducers.links(
                 state,
-                action.changeLinksOrder(
+                action.changeLinksOrderCreator(
                     "createdOn",
                     action.ORDER.ASC
                 )
@@ -327,12 +327,12 @@ describe("reducer tests", () => {
 
             recievedResults = reducers.links(
                 state,
-                action.changeLinksOrder(
+                action.changeLinksOrderCreator(
                     undefined,
                     action.ORDER.ASC
                 )
             )
-            
+
             expect(recievedResults.sortedData).toEqual(
                 sortedData
             )
