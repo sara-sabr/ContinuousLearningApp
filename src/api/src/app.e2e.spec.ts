@@ -439,11 +439,11 @@ describe('AppController (e2e)', () => {
           "/links"
         ).send(
           {
-            url: "thisisaurl.com",
+            url: "https://thisisaurl.com",
             language: "en",
             title: "this is a title",
             description: "This is description for a url",
-            imageLink: "thisisaurl.com/something.png",
+            imageLink: "https://thisisaurl.com/something.png",
 
           }
         )
@@ -460,7 +460,7 @@ describe('AppController (e2e)', () => {
         expect(dbRow.rows[0].url).toBe("thisisaurl.com")
         expect(dbRow.rows[0].title).toBe("this is a title")
         expect(dbRow.rows[0].language).toBe("en")
-        expect(dbRow.rows[0].image_link).toBe("thisisaurl.com/something.png")
+        expect(dbRow.rows[0].image_link).toBe("https://thisisaurl.com/something.png")
         expect(dbRow.rows[0].description).toBe("This is description for a url")
       })
       it("Internal Error for DatabaseError /links (POST)", async () => {
@@ -477,11 +477,11 @@ describe('AppController (e2e)', () => {
           "/links"
         ).send(
           {
-            url: "thisisaurl.com",
+            url: "https://thisisaurl.com",
             language: "en",
             title: "this is a title",
             description: "This is description for a url",
-            imageLink: "thisisaurl.com/something.png",
+            imageLink: "https://thisisaurl.com/something.png",
 
           }
         )
@@ -509,11 +509,11 @@ describe('AppController (e2e)', () => {
           "/links"
         ).send(
           {
-            url: "thisisaurl.com",
+            url: "https://thisisaurl.com/aurl",
             language: "en",
             title: "this is a title",
             description: "This is description for a url",
-            imageLink: "thisisaurl.com/something.png",
+            imageLink: "https://thisisaurl.com/something.png",
         
           }
         )
@@ -531,7 +531,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "testing.com",
+            url: "https://testing.com",
             title: "This is testing",
             language: "en"
           }
@@ -558,7 +558,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "aurlhasnowbeenincluded.com",
+            url: "https://aurlhasnowbeenincluded.com",
             title: "This is testing",
             language: "en"
           }
@@ -585,7 +585,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "en"
           }
@@ -612,7 +612,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "en"
           }
@@ -621,12 +621,52 @@ describe('AppController (e2e)', () => {
         expect(requestResponse.status).toBe(201)
       })
 
+      it("url field should have a valid protocol /links (POST)", async () => {
+        let requestResponse = await request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "host.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+
+        expect(requestResponse.status).toBe(400)
+        expect(requestResponse.body.message[0].property).toBe("url")
+
+        requestResponse = await request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "gsdfsdfsd://host.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+
+        expect(requestResponse.status).toBe(400)
+        expect(requestResponse.body.message[0].property).toBe("url")
+
+        requestResponse = await request(app.getHttpServer())
+        .post("/links")
+        .send(
+          {
+            url: "https://host.com",
+            title: "This is testing",
+            language: "en"
+          }
+        )
+        expect(requestResponse.status).toBe(201)
+
+      })
+
       it("title field is required /links (POST)", async () => {
         let requestResponse = await  request(app.getHttpServer())
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             language: "en"
           }
         )
@@ -638,7 +678,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "en"
           }
@@ -651,7 +691,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "",
             language: "en"
           }
@@ -664,7 +704,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "en"
           }
@@ -678,7 +718,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing"
           }
         )
@@ -690,7 +730,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "en"
           }
@@ -703,7 +743,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "not valid"
           }
@@ -716,7 +756,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "en"
           }
@@ -727,7 +767,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host-fr.com",
+            url: "https://host-fr.com",
             title: "This is testing fr",
             language: "fr"
           }
@@ -741,7 +781,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "en",
             description:""
@@ -755,7 +795,7 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "en",
             description:"this is a description"
@@ -772,10 +812,10 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "en",
-            imageLink: ".com/thisisaimage.png"
+            imageLink: "https://.com/thisisaimage.png"
           }
         )
       
@@ -786,10 +826,10 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "en",
-            imageLink: "host.com/thisisaimage.png"
+            imageLink: "https://host.com/thisisaimage.png"
           }
         )
       
@@ -803,10 +843,10 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "en",
-            imageLink: "host/thisisaimage.png"
+            imageLink: "https://host/thisisaimage.png"
           }
         )
       
@@ -817,10 +857,10 @@ describe('AppController (e2e)', () => {
         .post("/links")
         .send(
           {
-            url: "host.com",
+            url: "https://host.com",
             title: "This is testing",
             language: "en",
-            imageLink: "host.com/thisisaimage.png"
+            imageLink: "https://host.com/thisisaimage.png"
           }
         )
       

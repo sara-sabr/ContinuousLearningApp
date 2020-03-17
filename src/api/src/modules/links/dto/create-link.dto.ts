@@ -1,4 +1,4 @@
-import {IsFQDN, IsNotEmpty, Validate, IsOptional, IsUrl} from "class-validator";
+import {IsNotEmpty, Validate, IsOptional, IsUrl} from "class-validator";
 import {ValidLanguage} from "./validators/language-validator"
 import { ApiProperty , ApiPropertyOptional} from "@nestjs/swagger";
 
@@ -6,8 +6,11 @@ import { ApiProperty , ApiPropertyOptional} from "@nestjs/swagger";
 export class CreateLinkDTO{
     
     @ApiProperty({format: "url", example: "https://lookatthiscoollink.com"})
-    @IsFQDN({
+    @IsUrl({
+        require_protocol: true,
+        require_host: true,
         require_tld: true,
+        protocols: ["https", "http"],
         allow_underscores: true
     })
     @IsNotEmpty()
@@ -30,8 +33,11 @@ export class CreateLinkDTO{
     @ApiPropertyOptional({format: "url", example: "https://imagepage.com/thisisapng.png"})
     @IsOptional()
     @IsUrl({
+        require_protocol: true,
+        require_valid_protocol: true,
         require_host: true,
         require_tld: true,
+        protocols: ["https", "http"],
         allow_underscores: true 
     })
     imageLink?: string;

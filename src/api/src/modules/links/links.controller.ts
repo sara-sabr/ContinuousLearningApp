@@ -130,6 +130,14 @@ export class LinksController{
     })
     @UsePipes( new ValidationPipe())
     async createLink(@Body() createLinkDTO: CreateLinkDTO){
+        let url = createLinkDTO.url
+        if(url.startsWith("https")){
+            url = url.replace("https://", "")
+        }
+        else{
+            url = url.replace("http://", "")
+        }
+        createLinkDTO.url = url
         return await this.linksService.createLink(createLinkDTO)
     }
 }
