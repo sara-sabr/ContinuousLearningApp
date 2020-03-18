@@ -3,7 +3,11 @@ export const TYPES = {
     REQUEST: "REQUEST",
     RECIEVE: "RECIEVED",
     REQUEST_FAILED: "REQUEST_FAILED",
-    CHANGE_ORDER: "CHANGE_ORDER"
+    CHANGE_ORDER: "CHANGE_ORDER",
+    CREATE_NEW_LINK: "CREATE_NEW_LINK",
+    SUBMIT: "SUMBIT",
+    INVALID_LINK: "INVALID_LINK",
+    SUBMIT_FAILED: "SUBMIT_FAILED"
 }
 
 export const LANGUAGES = {
@@ -13,7 +17,13 @@ export const LANGUAGES = {
 
 export const RESOURCE_TYPES = {
     LINKS: "LINKS",
-    LINK: "LINK"
+    LINK: "LINK",
+    LINK_METADATA: "LINK_METADATA"
+}
+
+export const INVALID_LINK_TYPES = {
+    NOT_UNIQUE: "NOT_UNIQUE",
+    BAD_FORMAT: "BAD_FORMAT"
 }
 
 export const REQUEST_FAILURE_TYPES = {
@@ -84,4 +94,56 @@ export const changeLinksOrderCreator = function(orderBy=undefined, order){
 
 /* SUBMIT ACTIONS */
 
-export const create
+export const createNewLinkCreator = function(link){
+    return {
+        type: TYPES.CREATE_NEW_LINK,
+        link: link
+    }
+}
+
+export const linkNotUniqueCreator = function(){
+    return {
+        type: TYPES.INVALID_LINK,
+        invalidLinkType: INVALID_LINK_TYPES.NOT_UNIQUE
+    }
+}
+
+export const linkBadFormatCreator = function(){
+    return {
+        type: TYPES.INVALID_LINK,
+        invalidLinkType: INVALID_LINK_TYPES.BAD_FORMAT
+    }
+}
+
+export const submitFailedCreator = function(failureReason, message){
+    return {
+        type: TYPES.SUBMIT_FAILED,
+        resourceType: RESOURCE_TYPES.LINK,
+        failureReason: failureReason,
+        message: message
+    }
+}
+
+export const requestLinkMetadataCreator = function(){
+    return {
+        type: TYPES.REQUEST,
+        resourceType: RESOURCE_TYPES.LINK_METADATA
+    }
+}
+
+export const requestLinkMetadataFailedCreator = function(failureReason, message){
+    return {
+        type: TYPES.REQUEST_FAILED,
+        resourceType: RESOURCE_TYPES.LINK_METADATA,
+        failureReason: failureReason,
+        message: message
+    }
+}
+
+export const recievedLinkMetadataCreator = function(data){
+    return {
+        type: TYPES.RECIEVE,
+        resourceType: RESOURCE_TYPES.LINK_METADATA,
+        data
+    }
+}

@@ -112,7 +112,7 @@ describe("actions", () => {
         )
     })
 
-    it("changeLinksOrder", () => {
+    it("changeLinksOrderCreator", () => {
         let expectedAction = actions.changeLinksOrderCreator(
             "aField",
             actions.ORDER.DESC
@@ -127,4 +127,38 @@ describe("actions", () => {
             }
         )
     })
+
+    it("createNewLinkCreator", () => {
+        let expectedAction = actions.createNewLinkCreator(
+            "example.com"
+        )
+
+        expect(expectedAction).toEqual(
+            {
+                type: actions.TYPES.CREATE_NEW_LINK,
+                link: "example.com"
+            }
+        )
+    })
+
+    it("linkBadFormatCreator", () => {
+        let expectedAction = actions.linkBadFormatCreator()
+        expect(expectedAction).toEqual(
+            {
+                type: actions.TYPES.INVALID_LINK,
+                invalidLinkType: actions.INVALID_LINK_TYPES.BAD_FORMAT
+            }
+        )
+    })
+
+    it("linkBadFormatCreator", () => {
+        let expectedAction = actions.linkNotUniqueCreator()
+        expect(expectedAction).toEqual(
+            {
+                type: actions.TYPES.INVALID_LINK,
+                invalidLinkType: actions.INVALID_LINK_TYPES.NOT_UNIQUE
+            }
+        )
+    })
+
 })
