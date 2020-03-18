@@ -1,8 +1,7 @@
 import { combineReducers, bindActionCreators } from "redux"
 import {TYPES, RESOURCE_TYPES } from "./actions"
 import i18n from "../translations" 
-import { act } from "react-dom/test-utils"
-import { sortBasedOnKeys, sortBasedOnKey } from "./utils"
+import { sortBasedOnKey } from "./utils"
 
 
 export const language = function(state = i18n.language, action){
@@ -194,6 +193,18 @@ export const submit = function(
                     }
                 default:
                     return state
+            }
+        case TYPES.INVALID_LINK:
+            return {
+                ...state,
+                validLink: false,
+                invalidLinkReason: action.invalidLinkType
+            }
+        case TYPES.LINK_VALIDATED:
+            return {
+                ...state,
+                validLink: true,
+                invalidLinkReason: undefined
             }
         case TYPES.RECIEVE:
             switch(action.resourceType){

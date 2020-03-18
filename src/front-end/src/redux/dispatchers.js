@@ -171,7 +171,7 @@ export const fetchLinks = function(options = {
 
 /* submit dispatchers */
 
-async function checkIfLinkExists(link){
+async function checkIfLinkIsUnique(link){
     let encodedLink = encodeURIComponent(link)
     let requestUrl = variables.apiURL + `/links/url/${encodedLink}`
     try{
@@ -263,7 +263,7 @@ async function createNewLink(dispatch, link){
     if (isValidLink){
         let unique = false
         try{
-            unique = await checkIfLinkExists(link)
+            unique = await checkIfLinkIsUnique(link)
         }catch(e){
             if(e.message.startsWith("Endpoint Error")){
                 let status = error.status 
@@ -284,7 +284,22 @@ async function createNewLink(dispatch, link){
                 }   
             }
         }
-        if(unique){
+        if(! unique){
+            try{
+                let result = await fetch(link)
+                if (result.status >= 400 && result.status < 600){
+                    dispatch(
+                        actions.linkErrorCreator()
+                    )
+                }
+            }catch(e){
+                dispatch(
+                    actions.linkDoesNotExistCreator()
+                )
+            }
+            dispatch(
+                actions.linkValidatedCreator()
+            )
             await fetchLinkMetadata(dispatch, link)
         }
         else{
@@ -295,13 +310,13 @@ async function createNewLink(dispatch, link){
     }
     else{
         dispatch(
-            actions.linkBadFormatCreator
+            actions.linkBadFormatCreator()
         )
     }
 }
 
 
-export const createNewLink = function(link){
+export const createNewLinkDispatcher = function(link){
     return (dispatch) => {
         return createNewLink(dispatch, link)
     }

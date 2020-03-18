@@ -162,6 +162,39 @@ describe("actions", () => {
         )
     })
 
+    it("linkDoesNotExistCreator", () => {
+        let expectedAction = actions.linkDoesNotExistCreator()
+        expect(expectedAction).toEqual(
+            {
+                type: actions.TYPES.INVALID_LINK,
+                invalidLinkType: actions.INVALID_LINK_TYPES.DOES_NOT_EXIST
+            }
+        )
+    })
+
+    it("linkErrorCreator", () => {
+        let expectedAction = actions.linkErrorCreator()
+        expect(
+            expectedAction
+        ).toEqual(
+            {
+                type: actions.TYPES.INVALID_LINK,
+                invalidLinkType: actions.INVALID_LINK_TYPES.LINK_ERROR
+            }
+        )
+    })
+
+    it("linkValidatedCreator", () => {
+        let expectedAction = actions.linkValidatedCreator()
+        expect(
+            expectedAction
+        ).toEqual(
+            {
+                type: actions.TYPES.LINK_VALIDATED
+            }
+        )
+    })
+
     it("submitFailedCreator", () => {
         let expectedAction = actions.submitFailedCreator("someReason", "someMessage")
         expect(expectedAction).toEqual(

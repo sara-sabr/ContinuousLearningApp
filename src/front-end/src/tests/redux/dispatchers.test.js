@@ -497,7 +497,7 @@ describe("dispatcher tests", () => {
             dispatchers.changeOrder(mockedDispatchFunc, action.ORDER.ASC, "createdOn")
             expect(mockedDispatchFunc.mock.calls.length).toBe(1)
             expect(mockedDispatchFunc.mock.calls[0][0]).toEqual(
-                action.changeLinksOrder(
+                action.changeLinksOrderCreator(
                     "createdOn", action.ORDER.ASC
                 )
             )
@@ -506,6 +506,128 @@ describe("dispatcher tests", () => {
             consoleErrorMock.mockRestore()
         })
     })
+
+    describe("createNewLinkDispatcher", () => {
+        let apiURL
+        let store
+        beforeEach(() => {
+            apiURL = variables.apiURL
+            variables.apiURL = "/api"
+            store = mockStore()
+        })
+        it("creates new link and dipatches appropriate actions", () =>{
+            let url = "https://google.ca"
+            let encodedURL = encodeURIComponent(url)
+            fetchMock
+            .getOnce(
+                `/api/links/url/${encodedURL}`,
+                {
+                    status: 404
+                }
+            )
+            .getOnce(
+                "https://google.ca",
+                {
+                    status: 200
+                }
+            )
+            .getOnce(
+                variables.linkMetadataExtractorAPI + `/url=${encodedURL}`,
+                {
+                    status: 200,
+                    body: {
+                        someData: "someData"
+                    }
+                }
+            )
+
+            return store.dispatch(
+                dispatchers.createNewLinkDispatcher(url)
+            ).then(
+                () => {
+                    let expectedActions = store.getActions()
+                    expect(expectedActions.length).toBe(4)
+                    expect(expectedActions).toEqual(
+                        [
+                            action.createNewLinkCreator(
+                                url
+                            ),
+                            action.linkValidatedCreator(),
+                            action.requestLinkMetadataCreator(),
+                            action.recievedLinkMetadataCreator(
+                                {
+                                    someData: "someData"
+                                }
+                            )
+                        ]
+                    )
+                }
+            )
+        })
+
+        it("dipatches validation failure if link format is not valid", () => {
+            let url = "invalidformat.com"
+
+            return store.dispatch(
+                dispatchers.createNewLinkDispatcher(url)
+            ).then(
+                () => {
+                    let expectedActions = store.getActions()
+                    expect(expectedActions.length).toBe(2)
+                    expect(expectedActions).toEqual(
+                        [
+                            action.createNewLinkCreator(url),
+                            action.linkBadFormatCreator()
+                        ]
+                    )
+                }
+            )
+        })
+
+        it("dipatches validation failure of link is not unique", () => {
+            let url = "https://nonuniquelink.com"
+            let encodedURL = encodeURIComponent(url)
+
+            fetchMock
+            .getOnce(
+                `/api/links/url/${encodedURL}`,
+                {
+                    status: 200,
+                    body: {
+                        it: "exists"
+                    }
+                }
+            )
+
+            return store.dispatch(
+                dispatchers.createNewLinkDispatcher(url)
+            ).then(
+                () => {
+                    let expectedActions = store.getActions()
+                    expect(expectedActions.length).toBe(2)
+                    expect(expectedActions).toEqual(
+                        [
+                            action.createNewLinkCreator(url),
+                            action.linkNotUniqueCreator()
+                        ]
+                    )
+                }
+            )
+        })
+
+        it("dispatches submit failed action if uniqueness endpoint failes", () =>{
+            // let url = "http://link.com"
+
+        })
+
+
+        afterEach(() => {
+            variables.apiURL = apiURL
+        })
+
+
+    })
+
     afterEach(() => {
       spiedOnLocalStorageSet.mockRestore()
       spiedOnLocalStorageGet.mockRestore()
