@@ -59,6 +59,52 @@ export class LinksController{
         return this.linksService.getLinkById(id)
     }
 
+
+    @Get("/url/:url")
+    @ApiOperation({
+        tags: ["links"],
+        description: "Only want one link and want to grab it by its url ? "+
+        "Tomato your wish is some good potato ( potato being the resource ) 🧞‍♂️"
+    })
+    @ApiParam({
+        name: "url",
+        type: "string",
+        required: true,
+        allowEmptyValue: false,
+        description: "The url of dat link you want to grab",
+        example: "example.com/this/page"
+    })
+    @ApiResponse({
+        status: 200,
+        description: "How does it feel to win? Well you didn't win the lottery " +
+        "but, who knows, you just recieved a link that could change your life!",
+        type: ReturnedLinkDTO
+    })
+    @ApiNotFoundResponse({
+        status: 404,
+        description: "They say seek and ye shall find. Not this time. Why you ask ? " +
+        "Simple, it doesn't exist !"
+    })
+    @ApiInternalServerErrorResponse({
+        status: 500,
+        description: "I TOLD YOU TO CHECK... wait... what do you mean this is our fault" +
+        ".... one second please .... john this can't be our fault its a pretty simple route... " +
+        "check the status code ? ..... oh.... well this is akward. Sorry about that, " +
+        "we messed up here, totally not your fault... john we're gonna edit this in POST right ? "
+    })
+    async getLinkByURL(@Param("url") url){
+        if(url.startsWith("https://")){
+            url = url.replace("https://", "")
+        }
+        else{
+            url = url.replace("http://", "")
+        }
+        // need to validate url, better to return a 400 error
+        // rather than a 404 for a bad url
+        return this.linksService.getLinkByURL(url)
+
+    }
+
     @Get()
     @ApiOperation({
         description: "A route for you to get all the links 🔥!",
@@ -130,6 +176,14 @@ export class LinksController{
     })
     @UsePipes( new ValidationPipe())
     async createLink(@Body() createLinkDTO: CreateLinkDTO){
+        let url = createLinkDTO.url
+        if(url.startsWith("https")){
+            url = url.replace("https://", "")
+        }
+        else{
+            url = url.replace("http://", "")
+        }
+        createLinkDTO.url = url
         return await this.linksService.createLink(createLinkDTO)
     }
 }

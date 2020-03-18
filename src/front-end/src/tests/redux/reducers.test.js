@@ -1,5 +1,6 @@
 import * as reducers from "../../redux/reducers"
 import * as action from "../../redux/actions"
+
 import i18n from "../../translations"
 import { shuffleArray } from "../utils"
 
@@ -230,6 +231,272 @@ describe("reducer tests", () => {
                 }
             )
         })
+
+        it("handles CHANGE_ORDER action with change in order", () => {
+            let state = {
+                isFetching: false,
+                fetchFailed: false,
+                order: "asc",
+                orderBy: "createdOn",
+                data: {
+                    1: sortedData[0],
+                    2: sortedData[1],
+                    3: sortedData[2],
+                    4: sortedData[3],
+                    5: sortedData[4]
+                },
+                sortedData: sortedData
+            }
+
+            let returnedResult = reducers.links(
+                state,
+                action.changeLinksOrderCreator(
+                    undefined, action.ORDER.DESC
+                )
+            )
+
+            let expectedArray = Object.assign([], sortedData).reverse()
+            expect(returnedResult.sortedData).toEqual(
+                expectedArray
+            )
+        })
+        it("handles CHANGE_ORDER action with order and orderBy", () => {
+            let state = {
+                isFetching: false,
+                fetchFailed: false,
+                order: "asc",
+                orderBy: "createdOn",
+                data: {
+                    1: sortedData[0],
+                    2: sortedData[1],
+                    3: sortedData[2],
+                    4: sortedData[3],
+                    5: sortedData[4]
+                },
+                sortedData: sortedData
+            }
+
+            let expectedArray = [
+                sortedData[0], sortedData[4],
+                sortedData[1], sortedData[2],
+                sortedData[3]
+            ]
+
+            let recievedResults = reducers.links(
+                state,
+                action.changeLinksOrderCreator(
+                    "language",
+                    action.ORDER.ASC
+                )
+            )
+
+            expect(recievedResults.sortedData).toEqual(
+                expectedArray
+            )
+        })
+
+        it("returns state if order and orderedBy does not change", () => {
+            let state = {
+                isFetching: false,
+                fetchFailed: false,
+                order: "asc",
+                orderBy: "createdOn",
+                data: {
+                    1: sortedData[0],
+                    2: sortedData[1],
+                    3: sortedData[2],
+                    4: sortedData[3],
+                    5: sortedData[4]
+                },
+                sortedData: sortedData
+            }
+
+            let recievedResults = reducers.links(
+                state,
+                action.changeLinksOrderCreator(
+                    "createdOn",
+                    action.ORDER.ASC
+                )
+            )
+
+            expect(recievedResults.sortedData).toEqual(
+                sortedData
+            )
+            expect(recievedResults.order).toEqual("asc")
+            expect(recievedResults.orderBy).toEqual("createdOn")
+
+            recievedResults = reducers.links(
+                state,
+                action.changeLinksOrderCreator(
+                    undefined,
+                    action.ORDER.ASC
+                )
+            )
+
+            expect(recievedResults.sortedData).toEqual(
+                sortedData
+            )
+            expect(recievedResults.order).toEqual("asc")
+            expect(recievedResults.orderBy).toEqual("createdOn")
+        })
+    })
+
+    describe("submit", () => {
+        let rawLinkMetadata
+        beforeEach(() => {
+            rawLinkMetadata = {
+                status:"success",
+                data:{
+                    title:"Google", 
+                    description:"Search the world’s information, including webpages, images, videos and more. Google has many special features to help you find exactly what you’re looking for.",
+                    lang:"en",
+                    author:null,
+                    publisher:"google.ca",
+                    image:{
+                        url:"https://www.google.ca/images/branding/googleg/1x/googleg_standard_color_128dp.png",
+                        type:"png",
+                        size:3428,
+                        height:128,
+                        width:128,
+                        size_pretty:"3.43 kB"
+                    },
+                    url:"https://www.google.ca",
+                    date:"2020-03-18T00:54:30.000Z",
+                    logo:{
+                        url:"https://www.google.ca/favicon.ico",
+                        type:"ico",
+                        size:1494,
+                        height:16,
+                        width:16,
+                        size_pretty:"1.49 kB"
+                    }
+                }
+            }
+        })
+
+        it("default state", () => {
+            let expectedState = reducers.submit(
+                undefined, {}
+            )
+            expect(expectedState).toEqual(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: false,
+                    fetchMetadataFailed: false,
+                    linkData: {
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                }
+            )
+        })
+
+        it("handles REQUEST for LINK_METADATA action", () => {
+            let expectedState = reducers.submit(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: false,
+                    fetchMetadataFailed: true,
+                    linkData: {
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                }, action.requestLinkMetadataCreator()
+            )
+
+            expect(expectedState.isFetchingMetadata).toBe(true)
+            expect(expectedState.fetchMetadataFailed).toBe(false)
+        })
+
+        it("returns default state for REQUEST for all other types", () => {
+            let expectedState = reducers.submit(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: false,
+                    fetchMetadataFailed: true,
+                    linkData: {
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                }, {
+                    type: action.TYPES.REQUEST,
+                    resourceType: "SOME_OTHER_RESOURCE_TYPE"
+                }
+            )
+            expect(expectedState.isFetchingMetadata).toBe(false)
+            expect(expectedState.fetchMetadataFailed).toBe(true)
+        })
+
+        it("handles REQUEST_FAILED for LINK_METADATA action", () => {
+            let expectedState = reducers.submit(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: true,
+                    fetchMetadataFailed: false,
+                    linkData: {
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                } , action.requestLinkMetadataFailedCreator(
+                    "someReason", "someMessage"
+                )
+            )
+
+            expect(expectedState.fetchMetadataFailed).toBe(true)
+            expect(expectedState.isFetchingMetadata).toBe(false)
+            expect(expectedState.fetchMetadataFailureReason).toBe(
+                "someReason"
+            )
+            expect(expectedState.fetchMetatdataFailureMessage).toBe(
+                "someMessage"
+            )
+        })
+
+        it("returns default state for REQUEST_FAILED for all other types", () => {
+            let expectedState = reducers.submit(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: true,
+                    fetchMetadataFailed: false,
+                    linkData: {
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                } , {
+                    type: action.TYPES.REQUEST_FAILED,
+                    resourceType: "SOME_OTHER_TYPE"
+                }
+            )
+
+            expect(expectedState.isFetchingMetadata).toBe(true)
+            expect(expectedState.fetchMetadataFailed).toBe(false)
+        })
+
     })
 
 })

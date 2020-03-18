@@ -7,3 +7,6 @@ if(environment === "development"){
 else{
     apiURL = process.env.REACT_APP_API_URL || "/api"
 }
+
+
+export let linkMetadataExtractorAPI = process.env.REACT_APP_LINK_METADATA_EXTRACTOR || "https://api.microlink.io"
