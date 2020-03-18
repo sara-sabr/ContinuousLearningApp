@@ -1,5 +1,6 @@
 import * as actions from "../../redux/actions";
 import { initReactI18next } from "react-i18next";
+import { act } from "@testing-library/react";
 
 
 
@@ -157,6 +158,59 @@ describe("actions", () => {
             {
                 type: actions.TYPES.INVALID_LINK,
                 invalidLinkType: actions.INVALID_LINK_TYPES.NOT_UNIQUE
+            }
+        )
+    })
+
+    it("submitFailedCreator", () => {
+        let expectedAction = actions.submitFailedCreator("someReason", "someMessage")
+        expect(expectedAction).toEqual(
+            {
+                type: actions.TYPES.SUBMIT_FAILED,
+                resourceType: actions.RESOURCE_TYPES.LINK,
+                failureReason: "someReason",
+                message: "someMessage"
+
+            }
+        )
+    })
+
+    it("requestLinkMetadataCreator", () => {
+       let expectedAction = actions.requestLinkMetadataCreator()
+       expect(expectedAction).toEqual(
+           {
+               type: actions.TYPES.REQUEST,
+               resourceType: actions.RESOURCE_TYPES.LINK_METADATA
+           }
+       )
+    })
+
+    it("requestLinkMetadataFailedCreator", () => {
+        let expectedAction = actions.requestLinkMetadataFailedCreator("someReason", "someMessage")
+        expect(expectedAction).toEqual(
+            {
+                type: actions.TYPES.REQUEST_FAILED,
+                resourceType: actions.RESOURCE_TYPES.LINK_METADATA,
+                failureReason: "someReason",
+                message: "someMessage"
+            }
+        )
+    })
+
+    it("recievedLinkMetadataCreator", () => {
+        let expectedAction = actions.recievedLinkMetadataCreator(
+            {
+                someKey: "someData"
+            }
+        )
+
+        expect(expectedAction).toEqual(
+            {
+                type: actions.TYPES.RECIEVE,
+                resourceType: actions.RESOURCE_TYPES.LINK_METADATA,
+                data: {
+                    someKey: "someData"
+                }
             }
         )
     })
