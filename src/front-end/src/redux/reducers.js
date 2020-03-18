@@ -1,8 +1,7 @@
 import { combineReducers, bindActionCreators } from "redux"
 import {TYPES, RESOURCE_TYPES } from "./actions"
 import i18n from "../translations" 
-import { act } from "react-dom/test-utils"
-import { sortBasedOnKeys, sortBasedOnKey } from "./utils"
+import { sortBasedOnKey } from "./utils"
 
 
 export const language = function(state = i18n.language, action){
@@ -139,6 +138,7 @@ export const submit = function(
         isFetchingMetadata: false,
         fetchMetadataFailed: false,
         linkData:{
+            url: "",
             title: "",
             description: "",
             imageLink: "",
@@ -149,6 +149,24 @@ export const submit = function(
     }, action
 ){
     switch (action.type){
+        case TYPES.CREATE_NEW_LINK:
+            let newState = {
+                isSubmitting: false,
+                submitFailed: false,
+                validLink: false,
+                isFetchingMetadata: false,
+                fetchMetadataFailed: false,
+                linkData:{
+                    url: "",
+                    title: "",
+                    description: "",
+                    imageLink: "",
+                    language: ""
+                },
+                link: action.link
+            }
+
+            return newState
         case TYPES.REQUEST:
             switch(action.resourceType){
                 case RESOURCE_TYPES.LINK_METADATA:
@@ -175,6 +193,38 @@ export const submit = function(
                     }
                 default:
                     return state
+            }
+        case TYPES.INVALID_LINK:
+            return {
+                ...state,
+                validLink: false,
+                invalidLinkReason: action.invalidLinkType
+            }
+        case TYPES.LINK_VALIDATED:
+            return {
+                ...state,
+                validLink: true,
+                invalidLinkReason: undefined
+            }
+        case TYPES.RECIEVE:
+            switch(action.resourceType){
+                case RESOURCE_TYPES.LINK_METADATA:
+                    let rawData = action.data.data
+                    let linkData = {
+                        url: rawData["url"],
+                        title: rawData["title"],
+                        description: rawData["description"],
+                        language: rawData["lang"]
+                    }
+                    if(rawData.image){
+                        linkData["imageLink"] = rawData.image.url
+                    }
+
+                    return {
+                        ...state,
+                        isFetchingMetadata: false,
+                        linkData
+                    }
             }
         default:
             return state

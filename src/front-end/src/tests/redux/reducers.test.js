@@ -386,6 +386,7 @@ describe("reducer tests", () => {
                     isFetchingMetadata: false,
                     fetchMetadataFailed: false,
                     linkData: {
+                        url: "",
                         title: "",
                         description: "",
                         imageLink: "",
@@ -405,6 +406,7 @@ describe("reducer tests", () => {
                     isFetchingMetadata: false,
                     fetchMetadataFailed: true,
                     linkData: {
+                        url: "",
                         title: "",
                         description: "",
                         imageLink: "",
@@ -427,6 +429,7 @@ describe("reducer tests", () => {
                     isFetchingMetadata: false,
                     fetchMetadataFailed: true,
                     linkData: {
+                        url: "",
                         title: "",
                         description: "",
                         imageLink: "",
@@ -451,6 +454,7 @@ describe("reducer tests", () => {
                     isFetchingMetadata: true,
                     fetchMetadataFailed: false,
                     linkData: {
+                        url: "",
                         title: "",
                         description: "",
                         imageLink: "",
@@ -481,6 +485,7 @@ describe("reducer tests", () => {
                     isFetchingMetadata: true,
                     fetchMetadataFailed: false,
                     linkData: {
+                        url: "",
                         title: "",
                         description: "",
                         imageLink: "",
@@ -495,6 +500,85 @@ describe("reducer tests", () => {
 
             expect(expectedState.isFetchingMetadata).toBe(true)
             expect(expectedState.fetchMetadataFailed).toBe(false)
+        })
+
+        it("handles RECIEVE for LINK_METADATA action", () => {
+            let expectedState = reducers.submit(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: true,
+                    fetchMetadataFailed: false,
+                    linkData: {
+                        url: "",
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                },
+                action.recievedLinkMetadataCreator(rawLinkMetadata)
+            )
+
+            expect(expectedState.isFetchingMetadata).toBe(false)
+            expect(expectedState.linkData).toEqual(
+                {
+                    url: "https://www.google.ca",
+                    title: "Google",
+                    description: "Search the world’s information, including webpages, images, videos and more. Google has many special features to help you find exactly what you’re looking for.",
+                    imageLink: "https://www.google.ca/images/branding/googleg/1x/googleg_standard_color_128dp.png",
+                    language: "en"
+                }
+            )
+        })
+
+        it("returns default state for RECIEVE for all other types", () => {
+            let expectedSate = reducers.submit(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: true,
+                    fetchMetadataFailed: false,
+                    linkData: {
+                        url: "",
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                }, {
+                    type: action.TYPES.RECIEVE,
+                    resourceType: "SOME_OTHER_RESOURCE_TYPE"
+                }
+            )
+
+            expect(expectedSate.isFetchingMetadata).toBe(true)
+        })
+
+        it("handles CREATE_LINK action", () => {
+            let expectedSate = reducers.submit({}, action.createNewLinkCreator("https://www.google.com"))
+            expect(expectedSate).toEqual(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: false,
+                    fetchMetadataFailed: false,
+                    linkData:{
+                        url: "",
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: "https://www.google.com"
+            
+                }
+            )
         })
 
     })

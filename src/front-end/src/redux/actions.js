@@ -7,7 +7,8 @@ export const TYPES = {
     CREATE_NEW_LINK: "CREATE_NEW_LINK",
     SUBMIT: "SUMBIT",
     INVALID_LINK: "INVALID_LINK",
-    SUBMIT_FAILED: "SUBMIT_FAILED"
+    SUBMIT_FAILED: "SUBMIT_FAILED",
+    LINK_VALIDATED: "LINK_VALIDATED"
 }
 
 export const LANGUAGES = {
@@ -23,7 +24,9 @@ export const RESOURCE_TYPES = {
 
 export const INVALID_LINK_TYPES = {
     NOT_UNIQUE: "NOT_UNIQUE",
-    BAD_FORMAT: "BAD_FORMAT"
+    BAD_FORMAT: "BAD_FORMAT",
+    DOES_NOT_EXIST: "DOES_NOT_EXIST",
+    LINK_ERROR: "LINK_ERROR"
 }
 
 export const REQUEST_FAILURE_TYPES = {
@@ -112,6 +115,26 @@ export const linkBadFormatCreator = function(){
     return {
         type: TYPES.INVALID_LINK,
         invalidLinkType: INVALID_LINK_TYPES.BAD_FORMAT
+    }
+}
+
+export const linkDoesNotExistCreator = function(){
+    return {
+        type: TYPES.INVALID_LINK,
+        invalidLinkType: INVALID_LINK_TYPES.DOES_NOT_EXIST
+    }
+}
+
+export const linkErrorCreator = function(){
+    return {
+        type: TYPES.INVALID_LINK,
+        invalidLinkType: INVALID_LINK_TYPES.LINK_ERROR
+    }
+}
+
+export const linkValidatedCreator = function(){
+    return {
+        type: TYPES.LINK_VALIDATED
     }
 }
 
