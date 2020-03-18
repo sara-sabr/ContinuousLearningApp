@@ -441,6 +441,62 @@ describe("reducer tests", () => {
             expect(expectedState.isFetchingMetadata).toBe(false)
             expect(expectedState.fetchMetadataFailed).toBe(true)
         })
+
+        it("handles REQUEST_FAILED for LINK_METADATA action", () => {
+            let expectedState = reducers.submit(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: true,
+                    fetchMetadataFailed: false,
+                    linkData: {
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                } , action.requestLinkMetadataFailedCreator(
+                    "someReason", "someMessage"
+                )
+            )
+
+            expect(expectedState.fetchMetadataFailed).toBe(true)
+            expect(expectedState.isFetchingMetadata).toBe(false)
+            expect(expectedState.fetchMetadataFailureReason).toBe(
+                "someReason"
+            )
+            expect(expectedState.fetchMetatdataFailureMessage).toBe(
+                "someMessage"
+            )
+        })
+
+        it("returns default state for REQUEST_FAILED for all other types", () => {
+            let expectedState = reducers.submit(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: true,
+                    fetchMetadataFailed: false,
+                    linkData: {
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                } , {
+                    type: action.TYPES.REQUEST_FAILED,
+                    resourceType: "SOME_OTHER_TYPE"
+                }
+            )
+
+            expect(expectedState.isFetchingMetadata).toBe(true)
+            expect(expectedState.fetchMetadataFailed).toBe(false)
+        })
+
     })
 
 })
