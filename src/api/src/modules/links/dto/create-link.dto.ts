@@ -10,8 +10,7 @@ export class CreateLinkDTO{
         require_protocol: true,
         require_host: true,
         require_tld: true,
-        protocols: ["https", "http"],
-        allow_underscores: true
+        protocols: ["https", "http"]
     })
     @IsNotEmpty()
     url: string;
@@ -37,8 +36,7 @@ export class CreateLinkDTO{
         require_valid_protocol: true,
         require_host: true,
         require_tld: true,
-        protocols: ["https", "http"],
-        allow_underscores: true 
+        protocols: ["https", "http"]
     })
     imageLink?: string;
 }
