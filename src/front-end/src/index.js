@@ -7,9 +7,6 @@ import { ThemeProvider } from "@chakra-ui/core"
 import * as Keycloak from 'keycloak-js'
 
 // Keycloak configuration
-console.log(process.env.REACT_APP_KEYCLOAK_AUTH_URL);
-console.log(process.env.REACT_APP_KEYCLOAK_REALM);
-console.log(process.env.REACT_APP_KEYCLOAK_CLIENT_ID);
 let initOptions = {
     url: process.env.REACT_APP_KEYCLOAK_AUTH_URL,
     realm: process.env.REACT_APP_KEYCLOAK_REALM,
