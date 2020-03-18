@@ -14,8 +14,7 @@ class Secured extends Component {
             url: process.env.REACT_APP_KEYCLOAK_AUTH_URL,
             realm: process.env.REACT_APP_KEYCLOAK_REALM,
             clientId: process.env.REACT_APP_KEYCLOAK_CLIENT_ID,
-            onLoad: 'check-sso',
-            silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html'
+            onLoad: 'login-required',
         };
 
         var keycloak = Keycloak(initOptions);
