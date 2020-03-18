@@ -8,7 +8,7 @@ import { ThemeProvider } from "@chakra-ui/core"
 ReactDOM.render(
     <ThemeProvider>
         <App />
-    </ThemeProvider>, 
+    </ThemeProvider>,
     document.getElementById('root')
 );
 
