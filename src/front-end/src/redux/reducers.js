@@ -139,6 +139,7 @@ export const submit = function(
         isFetchingMetadata: false,
         fetchMetadataFailed: false,
         linkData:{
+            url: "",
             title: "",
             description: "",
             imageLink: "",
