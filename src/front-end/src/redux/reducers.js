@@ -129,9 +129,60 @@ export const links = function(state = {
         default:
             return state
     }
-} 
+}
+
+export const submit = function(
+    state= {
+        isSubmitting: false,
+        submitFailed: false,
+        validLink: false,
+        isFetchingMetadata: false,
+        fetchMetadataFailed: false,
+        linkData:{
+            title: "",
+            description: "",
+            imageLink: "",
+            language: ""
+        },
+        link: ""
+
+    }, action
+){
+    switch (action.type){
+        case TYPES.REQUEST:
+            switch(action.resourceType){
+                case RESOURCE_TYPES.LINK_METADATA:
+                    return {
+                        ...state,
+                        isFetchingMetadata: true,
+                        fetchMetadataFailed: false,
+                        fetchMetadataFailureReason: undefined,
+                        fetchMetatdataFailureMessage: undefined
+                    }
+                default:
+                    return state
+            }
+        case TYPES.REQUEST_FAILED:
+            switch(action.resourceType){
+                case RESOURCE_TYPES.LINK_METADATA:
+                    return {
+                        ...state,
+                        isFetchingMetadata: false,
+                        fetchMetadataFailed: true,
+                        fetchMetadataFailureReason: action.failureReason,
+                        fetchMetatdataFailureMessage: action.message
+
+                    }
+                default:
+                    return state
+            }
+        default:
+            return state
+    }
+}
 const rootReducer = combineReducers(
     {
+        submit, 
         links,
         language
     }

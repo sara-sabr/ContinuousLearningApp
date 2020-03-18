@@ -250,7 +250,7 @@ describe("reducer tests", () => {
 
             let returnedResult = reducers.links(
                 state,
-                action.changeLinksOrder(
+                action.changeLinksOrderCreator(
                     undefined, action.ORDER.DESC
                 )
             )
@@ -338,6 +338,108 @@ describe("reducer tests", () => {
             )
             expect(recievedResults.order).toEqual("asc")
             expect(recievedResults.orderBy).toEqual("createdOn")
+        })
+    })
+
+    describe("submit", () => {
+        let rawLinkMetadata
+        beforeEach(() => {
+            rawLinkMetadata = {
+                status:"success",
+                data:{
+                    title:"Google", 
+                    description:"Search the world’s information, including webpages, images, videos and more. Google has many special features to help you find exactly what you’re looking for.",
+                    lang:"en",
+                    author:null,
+                    publisher:"google.ca",
+                    image:{
+                        url:"https://www.google.ca/images/branding/googleg/1x/googleg_standard_color_128dp.png",
+                        type:"png",
+                        size:3428,
+                        height:128,
+                        width:128,
+                        size_pretty:"3.43 kB"
+                    },
+                    url:"https://www.google.ca",
+                    date:"2020-03-18T00:54:30.000Z",
+                    logo:{
+                        url:"https://www.google.ca/favicon.ico",
+                        type:"ico",
+                        size:1494,
+                        height:16,
+                        width:16,
+                        size_pretty:"1.49 kB"
+                    }
+                }
+            }
+        })
+
+        it("default state", () => {
+            let expectedState = reducers.submit(
+                undefined, {}
+            )
+            expect(expectedState).toEqual(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: false,
+                    fetchMetadataFailed: false,
+                    linkData: {
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                }
+            )
+        })
+
+        it("handles REQUEST for LINK_METADATA action", () => {
+            let expectedState = reducers.submit(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: false,
+                    fetchMetadataFailed: true,
+                    linkData: {
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                }, action.requestLinkMetadataCreator()
+            )
+
+            expect(expectedState.isFetchingMetadata).toBe(true)
+            expect(expectedState.fetchMetadataFailed).toBe(false)
+        })
+
+        it("returns default state for REQUEST for all other types", () => {
+            let expectedState = reducers.submit(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: false,
+                    fetchMetadataFailed: true,
+                    linkData: {
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                }, {
+                    type: action.TYPES.REQUEST,
+                    resourceType: "SOME_OTHER_RESOURCE_TYPE"
+                }
+            )
+            expect(expectedState.isFetchingMetadata).toBe(false)
+            expect(expectedState.fetchMetadataFailed).toBe(true)
         })
     })
 
