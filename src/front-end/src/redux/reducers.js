@@ -150,6 +150,24 @@ export const submit = function(
     }, action
 ){
     switch (action.type){
+        case TYPES.CREATE_NEW_LINK:
+            let newState = {
+                isSubmitting: false,
+                submitFailed: false,
+                validLink: false,
+                isFetchingMetadata: false,
+                fetchMetadataFailed: false,
+                linkData:{
+                    url: "",
+                    title: "",
+                    description: "",
+                    imageLink: "",
+                    language: ""
+                },
+                link: action.link
+            }
+
+            return newState
         case TYPES.REQUEST:
             switch(action.resourceType){
                 case RESOURCE_TYPES.LINK_METADATA:
@@ -176,6 +194,26 @@ export const submit = function(
                     }
                 default:
                     return state
+            }
+        case TYPES.RECIEVE:
+            switch(action.resourceType){
+                case RESOURCE_TYPES.LINK_METADATA:
+                    let rawData = action.data.data
+                    let linkData = {
+                        url: rawData["url"],
+                        title: rawData["title"],
+                        description: rawData["description"],
+                        language: rawData["lang"]
+                    }
+                    if(rawData.image){
+                        linkData["imageLink"] = rawData.image.url
+                    }
+
+                    return {
+                        ...state,
+                        isFetchingMetadata: false,
+                        linkData
+                    }
             }
         default:
             return state

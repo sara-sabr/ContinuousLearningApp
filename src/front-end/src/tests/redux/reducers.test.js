@@ -534,6 +534,53 @@ describe("reducer tests", () => {
             )
         })
 
+        it("returns default state for RECIEVE for all other types", () => {
+            let expectedSate = reducers.submit(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: true,
+                    fetchMetadataFailed: false,
+                    linkData: {
+                        url: "",
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: ""
+                }, {
+                    type: action.TYPES.RECIEVE,
+                    resourceType: "SOME_OTHER_RESOURCE_TYPE"
+                }
+            )
+
+            expect(expectedSate.isFetchingMetadata).toBe(true)
+        })
+
+        it("handles CREATE_LINK action", () => {
+            let expectedSate = reducers.submit({}, action.createNewLinkCreator("https://www.google.com"))
+            expect(expectedSate).toEqual(
+                {
+                    isSubmitting: false,
+                    submitFailed: false,
+                    validLink: false,
+                    isFetchingMetadata: false,
+                    fetchMetadataFailed: false,
+                    linkData:{
+                        url: "",
+                        title: "",
+                        description: "",
+                        imageLink: "",
+                        language: ""
+                    },
+                    link: "https://www.google.com"
+            
+                }
+            )
+        })
+
     })
 
 })
