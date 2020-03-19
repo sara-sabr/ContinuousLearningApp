@@ -4,7 +4,6 @@ import * as variables from "../../variables";
 import configureMockStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import fetchMock from "fetch-mock";
-import { Response } from "cross-fetch/dist/node-ponyfill";
 
 const middlewares = [thunk]
 
@@ -616,10 +615,314 @@ describe("dispatcher tests", () => {
         })
 
         it("dispatches submit failed action if uniqueness endpoint failes", () =>{
-            // let url = "http://link.com"
+            let url = "http://link.com"
+            let encodedURL = encodeURIComponent(url)
+            fetchMock
+            .getOnce(
+                `/api/links/url/${encodedURL}`,
+                {
+                    status: 500
+                }
+            )
 
+            return store.dispatch(
+                dispatchers.createNewLinkDispatcher(url)
+            ).then(
+                () => {
+                    let expectedActions = store.getActions()
+                    expect(expectedActions.length).toBe(2)
+                    expect(expectedActions).toEqual(
+                        [
+                            action.createNewLinkCreator(url),
+                            action.submitFailedCreator(
+                                action.REQUEST_FAILURE_TYPES.SERVER_ERROR,
+                                "Endpoint Error: Recieved bad response from endpoint, could not validate " +
+                                "status: 500"
+                            )
+                        ]
+                    )
+
+                } 
+            )
         })
 
+        it("dispatches submit failed action if uniqueness endpoint gives bad response", () => {
+            let url = "http://link.com"
+            let encodedURL = encodeURIComponent(url)
+            fetchMock
+            .getOnce(
+                `/api/links/url/${encodedURL}`,
+                {
+                    status: 400
+                }
+            )
+
+            return store.dispatch(
+                dispatchers.createNewLinkDispatcher(url)
+            ).then(
+                () => {
+                    let expectedActions = store.getActions()
+                    expect(expectedActions.length).toBe(2)
+                    expect(expectedActions).toEqual(
+                        [
+                            action.createNewLinkCreator(url),
+                            action.submitFailedCreator(
+                                action.REQUEST_FAILURE_TYPES.BAD_REQUEST,
+                                "Endpoint Error: Recieved bad response from endpoint, could not validate " +
+                                "status: 400"
+                            )
+                        ]
+                    )
+
+                } 
+            )
+        })
+
+        it("dispatches submit failed action if network error happens as a result of the uniqueness endpoint", () => {
+            let url = "http://link.com"
+            let encodedURL = encodeURIComponent(url)
+            fetchMock
+            .getOnce(
+                `/api/links/url/${encodedURL}`,
+                {
+                    throws: new Error("some error")
+                }
+            )
+
+            return store.dispatch(
+                dispatchers.createNewLinkDispatcher(url)
+            ).then(
+                () => {
+                    let expectedActions = store.getActions()
+                    expect(expectedActions.length).toBe(2)
+                    expect(expectedActions).toEqual(
+                        [
+                            action.createNewLinkCreator(url),
+                            action.submitFailedCreator(
+                                action.REQUEST_FAILURE_TYPES.NETWORK_ERROR,
+                                "Network Error: some error"
+                            )
+                        ]
+                    )
+                }
+            )
+        })
+
+        it("dipatches INVALID_LINK action for link with bad response", () => {
+            let url = "http://link.com"
+            let encodedURL = encodeURIComponent(url)
+
+            fetchMock
+            .getOnce(
+                `/api/links/url/${encodedURL}`,
+                {
+                    status: 404
+                }
+            )
+            .getOnce(
+                url,
+                {
+                    status: 500
+                }
+            )
+
+            return store.dispatch(
+                dispatchers.createNewLinkDispatcher(url)
+            ).then(
+                () => {
+                    let expectedActions = store.getActions()
+                    expect(expectedActions.length).toBe(2)
+                    expect(expectedActions).toEqual(
+                        [
+                            action.createNewLinkCreator(url),
+                            action.linkErrorCreator()
+                        ]
+                    )
+                }
+            )
+        })
+
+        it("dispatches INVALID_LINK action for link that results in Network Error", () => {
+            let url = "http://link.com"
+            let encodedURL = encodeURIComponent(url)
+
+            fetchMock
+            .getOnce(
+                `/api/links/url/${encodedURL}`,
+                {
+                    status: 404
+                }
+            )
+            .getOnce(
+                url,
+                {
+                    throws: new Error("it doesn't exist")
+                }
+            )
+
+            return store.dispatch(
+                dispatchers.createNewLinkDispatcher(url)
+            ).then(
+                () => {
+                    let expectedActions = store.getActions()
+                    expect(expectedActions.length).toBe(2)
+                    expect(expectedActions).toEqual(
+                        [
+                            action.createNewLinkCreator(url),
+                            action.linkDoesNotExistCreator()
+                        ]
+                    )
+                }
+            )
+        })
+
+        it("dispatches REQUEST_FAILED action metadata endpoint failure for bad request", () => {
+            let url = "http://link.com"
+            let encodedURL = encodeURIComponent(url)
+
+            fetchMock
+            .getOnce(
+                `/api/links/url/${encodedURL}`,
+                {
+                    status: 404
+                }
+            )
+            .getOnce(
+                url,
+                {
+                    status: 200
+                }
+            )
+            .getOnce(
+                variables.linkMetadataExtractorAPI + `/url=${encodedURL}`,
+                {
+                    status: 400,
+                    body: {
+                        status:"fail",
+                        data:{
+                            url:"The URL `http://link.com` is not valid. Ensure it has protocol, hostname and is reachable."
+                        },
+                        code:"EINVALURL",
+                        more:"https://microlink.io/einvalurl",
+                        report:"mailto:hello@microlink.io?subject=%5Bmicrolink%5D%20Request%20failed&body=Hello%2C%20The%20following%20API%20request%20wasn't%20processed%20properly%3A%0A%0A%20%20-%20request%20id%3A%20%60qAA7gPdDIgFX3I3NBxkhs%60.%0A%20%20-%20request%20uri%3A%20https%3A%2F%2F159.89.241.197%2F%3Furl%3Dhttfwefew.%0A%20%20-%20error%20code%3A%20EINVALURL%20(https%3A%2F%2Fmicrolink.io%2Feinvalurl).%0A%0ACan%20you%20take%20a%20look%3F%20Thanks!%0A",
+                        message:"The request has been not processed. See the errors above to know why."
+                    }
+                
+                }
+            )
+
+            return store.dispatch(
+                dispatchers.createNewLinkDispatcher(url)
+            ).then(
+                () => {
+                    let expectedActions = store.getActions()
+                    expect(expectedActions.length).toBe(4)
+                    expect(expectedActions).toEqual(
+                        [
+                            action.createNewLinkCreator(url),
+                            action.linkValidatedCreator(),
+                            action.requestLinkMetadataCreator(),
+                            action.requestLinkMetadataFailedCreator(
+                                action.REQUEST_FAILURE_TYPES.BAD_REQUEST,
+                                "EINVALURL: " + "The URL `http://link.com` is not valid. Ensure it has protocol, hostname and is reachable."
+                            )
+                        ]
+                    )
+                }
+            )
+        })
+
+        it("dispatches REQUEST_FAILED action metadata endpoint failure for internal error", () => {
+            let url = "http://links.com"
+            let encodedURL = encodeURIComponent(url)
+
+            fetchMock
+            .getOnce(
+                `/api/links/url/${encodedURL}`,
+                {
+                    status: 404
+                }
+            )
+            .getOnce(
+                url,
+                {
+                    status: 200
+                }
+            )
+            .getOnce(
+                variables.linkMetadataExtractorAPI + `/url=${encodedURL}`,
+                {
+                    status: 500,
+                    body: "An internl error has occured"
+                
+                }
+            )
+
+            return store.dispatch(
+                dispatchers.createNewLinkDispatcher(url)
+            ).then(
+                () => {
+                    let expectedActions = store.getActions()
+                    expect(expectedActions.length).toBe(4)
+                    expect(expectedActions).toEqual(
+                        [
+                            action.createNewLinkCreator(url),
+                            action.linkValidatedCreator(),
+                            action.requestLinkMetadataCreator(),
+                            action.requestLinkMetadataFailedCreator(
+                                action.REQUEST_FAILURE_TYPES.SERVER_ERROR,
+                                "An unknown error has occured"
+                            )
+                        ]
+                    )
+                }
+            )
+        })
+
+        it("dispatches REQUEST_FAILED action metadata endpoint failure for network error", () =>{
+            let url = "http://links.com"
+            let encodedURL = encodeURIComponent(url)
+
+            fetchMock
+            .getOnce(
+                `/api/links/url/${encodedURL}`,
+                {
+                    status: 404
+                }
+            )
+            .getOnce(
+                url,
+                {
+                    status: 200
+                }
+            )
+            .getOnce(
+                variables.linkMetadataExtractorAPI + `/url=${encodedURL}`,
+                {
+                    throws: new Error("something bad happened")
+                }
+            )
+
+            return store.dispatch(
+                dispatchers.createNewLinkDispatcher(url)
+            ).then(
+                () => {
+                    let expectedActions = store.getActions()
+                    expect(expectedActions.length).toBe(4)
+                    expect(expectedActions).toEqual(
+                        [
+                            action.createNewLinkCreator(url),
+                            action.linkValidatedCreator(),
+                            action.requestLinkMetadataCreator(),
+                            action.requestLinkMetadataFailedCreator(
+                                action.REQUEST_FAILURE_TYPES.NETWORK_ERROR,
+                                "something bad happened"
+                            )
+                        ]
+                    )
+                }
+            )
+        })
 
         afterEach(() => {
             variables.apiURL = apiURL

@@ -174,29 +174,27 @@ export const fetchLinks = function(options = {
 async function checkIfLinkIsUnique(link){
     let encodedLink = encodeURIComponent(link)
     let requestUrl = variables.apiURL + `/links/url/${encodedLink}`
+    let result
     try{
-        let result = await fetch(requestUrl)
+        result = await fetch(requestUrl)
         if (result.ok){
-            return true 
-        }
-        else if(result.status === 404){
             return false
         }
-        else{
-            let responseBody = await result.text()
-            let error = new Error(
-                "Endpoint Error: Recieved bad response from endpoint, could not validate " +
-                "status: " + result.status,
-                "body: " + responseBody
-            )
-            error.status = result.status
-            
-            throw error
+        else if(result.status === 404){
+            return true 
         }
-
     }catch(e){
         throw new Error("Network Error: " + e.message)
     }
+
+    let responseBody = await result.text()
+    let error = new Error(
+        "Endpoint Error: Recieved bad response from endpoint, could not validate " +
+        "status: " + result.status + (responseBody ? " body: " + responseBody: "" )
+    )
+    error.status = result.status
+    
+    throw error
 }
 
 async function fetchLinkMetadata(dispatch, link){
@@ -216,9 +214,15 @@ async function fetchLinkMetadata(dispatch, link){
             )
         }
         else{
-            let data = await result.json()
-            let message = data.code + ": " + data.message
             if (result.status >= 400 && result.status <500){
+                let data = await result.json()
+                let message = data.code
+                if(data.data){
+                    message += ": " + Object.values(data.data).join(", ")
+                }
+                else if(data.message){
+                    message += ": " + data.message
+                }
                 dispatch(
                     actions.requestLinkMetadataFailedCreator(
                         actions.REQUEST_FAILURE_TYPES.BAD_REQUEST,
@@ -227,11 +231,27 @@ async function fetchLinkMetadata(dispatch, link){
                 )
             }
             else{
-                let data = await result.json()
-                let message = data.code + ": " + data.message
+                let data
+                let message = ""
+                try{
+                    data = await result.json()
+                }catch(e){
+                    message = "An unknown error has occured"
+                }
+                if(data && data.code){
+                    message = data.code
+                    if(data.data){
+                        message += ": " + Object.values(data.data).join(", ")
+                    }
+                    else if(data.message){
+                        message += ": " + data.message
+                    }
+                }else if (data && data.message){
+                        message = data.message
+                }
                 dispatch(
                     actions.requestLinkMetadataFailedCreator(
-                        actions.REQUEST_FAILURE_TYPES.BAD_REQUEST,
+                        actions.REQUEST_FAILURE_TYPES.SERVER_ERROR,
                         message
                     )
                 )
@@ -264,9 +284,35 @@ async function createNewLink(dispatch, link){
         let unique = false
         try{
             unique = await checkIfLinkIsUnique(link)
+            if(unique){
+                try{
+                    let result = await fetch(link)
+                    if (result.status >= 400 && result.status < 600){
+                        dispatch(
+                            actions.linkErrorCreator()
+                        )
+                    }
+                    else{
+                        dispatch(
+                            actions.linkValidatedCreator()
+                        )
+                        await fetchLinkMetadata(dispatch, link)
+                    }
+                }catch(e){
+                    dispatch(
+                        actions.linkDoesNotExistCreator()
+                    )
+                }
+               
+            }
+            else{
+                dispatch(
+                    actions.linkNotUniqueCreator()
+                )
+            }
         }catch(e){
             if(e.message.startsWith("Endpoint Error")){
-                let status = error.status 
+                let status = e.status 
                 if (status >= 400 && status < 500){
                     dispatch(
                         actions.submitFailedCreator(
@@ -278,34 +324,20 @@ async function createNewLink(dispatch, link){
                 if (status >= 500 && status < 600){
                     dispatch(
                         actions.submitFailedCreator(
-                            actions.REQUEST_FAILURE_TYPES.SERVER_ERROR
+                            actions.REQUEST_FAILURE_TYPES.SERVER_ERROR,
+                            e.message
                         )
                     )
                 }   
             }
-        }
-        if(! unique){
-            try{
-                let result = await fetch(link)
-                if (result.status >= 400 && result.status < 600){
-                    dispatch(
-                        actions.linkErrorCreator()
-                    )
-                }
-            }catch(e){
+            else{
                 dispatch(
-                    actions.linkDoesNotExistCreator()
+                    actions.submitFailedCreator(
+                        actions.REQUEST_FAILURE_TYPES.NETWORK_ERROR,
+                        e.message
+                    )
                 )
             }
-            dispatch(
-                actions.linkValidatedCreator()
-            )
-            await fetchLinkMetadata(dispatch, link)
-        }
-        else{
-            dispatch(
-                actions.linkNotUniqueCreator()
-            )
         }
     }
     else{
