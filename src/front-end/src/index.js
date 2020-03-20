@@ -4,11 +4,22 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { ThemeProvider } from "@chakra-ui/core"
+import store from "./redux/store"
+import { Provider } from "react-redux"
+import keycloak, {keycloakProviderInitConfig} from "./keycloak"
+import { KeycloakProvider } from "@react-keycloak/web"
 
 ReactDOM.render(
-    <ThemeProvider>
-        <App />
-    </ThemeProvider>,
+    <KeycloakProvider 
+        keycloak={keycloak}
+        initConfig={keycloakProviderInitConfig}
+    >
+        <Provider store = {store}>
+            <ThemeProvider>
+                <App />
+            </ThemeProvider>
+        </Provider>
+    </KeycloakProvider>,
     document.getElementById('root')
 );
 

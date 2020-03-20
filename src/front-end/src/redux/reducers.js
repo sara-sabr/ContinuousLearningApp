@@ -1,4 +1,4 @@
-import { combineReducers, bindActionCreators } from "redux"
+import { combineReducers} from "redux"
 import {TYPES, RESOURCE_TYPES } from "./actions"
 import i18n from "../translations" 
 import { sortBasedOnKey } from "./utils"
@@ -48,7 +48,7 @@ export const links = function(state = {
 
                     action.data.map(
                         (val) => {
-                            fetchedLinks[val.id] = val
+                            return fetchedLinks[val.id] = val
                         }
                     )
 
@@ -225,6 +225,8 @@ export const submit = function(
                         isFetchingMetadata: false,
                         linkData
                     }
+                default:
+                    return state
             }
         default:
             return state
