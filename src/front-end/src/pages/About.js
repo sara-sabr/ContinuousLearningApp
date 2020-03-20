@@ -1,7 +1,9 @@
 import React from 'react';
+import {Navigation} from "./Navigation"
 
 const About = () => (
-    <div>
+    <div className="container">
+        <Navigation/>
         <h2>About</h2>
 
         <h3>Backgroud</h3>

@@ -1,0 +1,1 @@
+export { SecuredRoute } from "./secureRouter"
