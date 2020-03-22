@@ -1,12 +1,22 @@
 import React from "react";
-import { useLocation} from "react-router-dom"
-import {Heading, Flex, Menu, MenuButton, MenuList, MenuItem, Button} from "@chakra-ui/core";
-
+import {Heading, Flex, Menu, MenuButton, MenuList, Button, MenuGroup } from "@chakra-ui/core";
+import {NavMenuItem} from "../molecules/navMenuItem"
+import {useTranslation} from "react-i18next"
+import {useDispatch} from "react-redux"
+import { changeLanguage } from "../../redux/dispatchers"
 
 
 export function Navigation(props){
-    let location = useLocation()
-    console.log(location)
+    let dispatch = useDispatch()
+    let [t, i18n ] = useTranslation()
+    let languageToggle = () => {
+        if(i18n.language === "en"){
+            changeLanguage("fr", dispatch)
+        }
+        else{
+            changeLanguage("en", dispatch)
+        }
+    }
     return (
         <Flex
         as="nav"
@@ -15,50 +25,81 @@ export function Navigation(props){
         padding="0.5rem"
         bg="purple.400"
         color="white"
-        {...props}
         >
         <Flex align="center" mr={5}>
-            <Heading as="h1" size="lg">
-            GCShare
+            <Heading 
+                as="h1" 
+                size="lg"
+                fontSize={[
+                    "md",
+                    "lg"
+                ]}
+            >
+              {t("GCShare")}
             </Heading>
         </Flex>
         <Menu>     
             <MenuButton
                 width={[
-                    "90px",
-                    "100px",
+                    "95px",
+                    "110px",
                 ]}
                 fontSize={[
                     "sm",
                     "md"
                 ]}
-                bg="gray.700" 
-                leftIcon="drag-handle"
+                leftIcon= {props.icon}
+                bg="gray.700"
                 as={Button} 
                 rightIcon="chevron-down"
                 _hover={{ bg: "gray.600"}}
             >
-                {props.page}
+                {t(props.page)}
             </MenuButton>
             <MenuList
                 bg="gray.700"
             >
-                <MenuItem
-                    _focus={{
-                        bg: "gray.600"
-                    }}   
-                >
-                    Download
-                </MenuItem>
-                <MenuItem
-                    _focus={{
-                        bg: "gray.600"
-                    }} 
-                    onClick={() => alert("Kagebunshin")}>
-                        Create a Copy
-                </MenuItem>
+                <MenuGroup title= "pages" >
+                    <NavMenuItem
+                    link="/home"
+                    icon="home"
+                    focusColor="gray.600"
+                    >
+                        {t("Home")}
+                    </NavMenuItem>
+                    <NavMenuItem
+                    link="/links"
+                    icon="link"
+                    focusColor="gray.600"
+                    > 
+                        {t("Links")}
+                    </NavMenuItem>
+                    <NavMenuItem
+                        link="/submit"
+                        icon="submit"
+                        focusColor="gray.600"
+                    >
+                        {t("Submit")}
+                    </NavMenuItem>
+                </MenuGroup>
             </MenuList>
         </Menu>
+
+        <Button 
+            ml="1" 
+            leftIcon="earth" 
+            bg="gray.700"
+            fontSize={[
+                "sm",
+                "md"
+            ]}
+            onClick={languageToggle}
+            _hover = {{
+                bg: "gray.600"
+            }}
+        >
+            { i18n.language === "en" ? "FR": "EN"}
+        </Button>
         
         </Flex>
     );

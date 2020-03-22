@@ -8,6 +8,7 @@ import store from "./redux/store"
 import { Provider } from "react-redux"
 import keycloak, {keycloakProviderInitConfig} from "./keycloak"
 import { KeycloakProvider } from "@react-keycloak/web"
+import {theme} from "./theme"
 
 ReactDOM.render(
     <KeycloakProvider 
@@ -15,7 +16,7 @@ ReactDOM.render(
         initConfig={keycloakProviderInitConfig}
     >
         <Provider store = {store}>
-            <ThemeProvider>
+            <ThemeProvider theme={theme}>
                 <CSSReset/>
                 <App />
             </ThemeProvider>
