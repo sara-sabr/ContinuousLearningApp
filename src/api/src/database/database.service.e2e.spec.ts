@@ -14,7 +14,6 @@ import { DatabaseError, NoDataFound } from "../utils/errors"
 dotenv.config()
 jest.mock("../configs/config.service")
 
-const mockedConfigurationService = mocked(ConfigurationService, true)
 
 describe("database service tests", () => {
     let databaseService: DatabaseService

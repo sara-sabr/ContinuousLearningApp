@@ -6,10 +6,20 @@ i18n
     .init({
         resources: {
             en: {
-                translation: {}
+                translation: {
+                    "GCShare": "GCShare",
+                    "Home": "Home",
+                    "Links": "Links",
+                    "Submit": "Submit"
+                }
             },
             fr: {
-                translation: {}
+                translation: {
+                    "GCShare": "GCPartager",
+                    "Home": "Accueil",
+                    "Links": "Liens",
+                    "Submit": "Soumettre"
+                }
             }
         },
         lng: "en",

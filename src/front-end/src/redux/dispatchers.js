@@ -4,6 +4,17 @@ import * as variables from "../variables";
 import validator from "validator"
 
 
+
+export const loadLanguageFromLocalstorage = function(language, dispatcher){
+    let localStorageLanguage = localStorage.getItem("language")
+    if( localStorageLanguage && actions.LANGUAGES[localStorageLanguage] && localStorageLanguage !== language){
+        dispatcher(
+            actions.changeLanguageCreator(localStorageLanguage)
+        )
+    }
+}
+
+
 export const changeLanguage = function(language, dispatcher){
     let currentLanguage = localStorage.getItem("language")
     if (! currentLanguage){
