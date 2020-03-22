@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { ThemeProvider } from "@chakra-ui/core"
+import { ThemeProvider, CSSReset } from "@chakra-ui/core"
 import store from "./redux/store"
 import { Provider } from "react-redux"
 import keycloak, {keycloakProviderInitConfig} from "./keycloak"
@@ -16,6 +16,7 @@ ReactDOM.render(
     >
         <Provider store = {store}>
             <ThemeProvider>
+                <CSSReset/>
                 <App />
             </ThemeProvider>
         </Provider>

@@ -90,6 +90,9 @@ export default class ConfigurationService {
                     this.configurationFile = {}
                 }
             }
+            else{
+                this.configurationFile = {}
+            }
         }
 
         else if (environment === "production"){
@@ -109,6 +112,9 @@ export default class ConfigurationService {
                     throw e
                 }
                 
+            }
+            else{
+                this.configurationFile = {}
             }
         }
 
