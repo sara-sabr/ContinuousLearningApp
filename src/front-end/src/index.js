@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { ThemeProvider, CSSReset } from "@chakra-ui/core"
@@ -9,6 +8,7 @@ import { Provider } from "react-redux"
 import keycloak, {keycloakProviderInitConfig} from "./keycloak"
 import { KeycloakProvider } from "@react-keycloak/web"
 import {theme} from "./theme"
+import "./index.css"
 
 ReactDOM.render(
     <KeycloakProvider 

@@ -1,30 +1,21 @@
 import React from "react";
 import {Heading, Flex, Menu, MenuButton, MenuList, Button, MenuGroup } from "@chakra-ui/core";
 import {NavMenuItem} from "../molecules/navMenuItem"
+import { ChangeLanguageButton } from "../molecules/changeLanguageButton"
 import {useTranslation} from "react-i18next"
-import {useDispatch} from "react-redux"
-import { changeLanguage } from "../../redux/dispatchers"
-
+import PropTypes from "prop-types"
 
 export function Navigation(props){
-    let dispatch = useDispatch()
-    let [t, i18n ] = useTranslation()
-    let languageToggle = () => {
-        if(i18n.language === "en"){
-            changeLanguage("fr", dispatch)
-        }
-        else{
-            changeLanguage("en", dispatch)
-        }
-    }
+    let [t] = useTranslation()
     return (
         <Flex
         as="nav"
         align="center"
         wrap="wrap"
-        padding="0.5rem"
+        padding="5px"
         bg="purple.400"
         color="white"
+        height="60px"
         >
         <Flex align="center" mr={5}>
             <Heading 
@@ -41,20 +32,20 @@ export function Navigation(props){
         <Menu>     
             <MenuButton
                 width={[
-                    "95px",
-                    "110px",
+                    "120px",
+                    "150px",
                 ]}
                 fontSize={[
                     "sm",
                     "md"
                 ]}
-                leftIcon= {props.icon}
+                leftIcon= {props.icon? props.icon : undefined}
                 bg="gray.700"
                 as={Button} 
                 rightIcon="chevron-down"
                 _hover={{ bg: "gray.600"}}
             >
-                {t(props.page)}
+                {props.page ? t(props.page): t("Navigation")}
             </MenuButton>
             <MenuList
                 bg="gray.700"
@@ -84,23 +75,21 @@ export function Navigation(props){
                 </MenuGroup>
             </MenuList>
         </Menu>
-
-        <Button 
-            ml="1" 
-            leftIcon="earth" 
-            bg="gray.700"
+        <ChangeLanguageButton
+            ml = "1"
+            bg = "gray.700"
             fontSize={[
                 "sm",
                 "md"
             ]}
-            onClick={languageToggle}
-            _hover = {{
-                bg: "gray.600"
-            }}
-        >
-            { i18n.language === "en" ? "FR": "EN"}
-        </Button>
-        
+            hoverColor = "gray.600"
+        />
         </Flex>
     );
 };
+
+
+Navigation.propTypes = {
+    icon: PropTypes.string,
+    page: PropTypes.string.isRequired   
+}

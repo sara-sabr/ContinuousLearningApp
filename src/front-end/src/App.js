@@ -1,5 +1,4 @@
 import React, {useEffect} from 'react';
-import './App.css';
 import i18n from "./translations"
 import {loadLanguageFromLocalstorage} from "./redux/dispatchers"
 import {useDispatch, useSelector } from "react-redux"
