@@ -521,7 +521,6 @@ describe("reducer tests", () => {
                 },
                 action.recievedLinkMetadataCreator(rawLinkMetadata)
             )
-
             expect(expectedState.isFetchingMetadata).toBe(false)
             expect(expectedState.linkData).toEqual(
                 {

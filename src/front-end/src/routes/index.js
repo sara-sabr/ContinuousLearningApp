@@ -1,6 +1,7 @@
 import React from "react"
 import {BrowserRouter, Route, Redirect, Switch} from "react-router-dom"
 import { useKeycloak } from "@react-keycloak/web"
+import {LoadAnimation} from "../components/organisms/LoadAnimation"
 import { Home  }  from "../pages/Home";
 import { Links } from "../pages/Links"
 import { Link } from "../pages/Link"
@@ -10,7 +11,7 @@ export function AppRouter(props){
     const [,initialized] = useKeycloak()
 
     if(!initialized){
-        return <div>Loading...</div>
+        return <LoadAnimation/>
     }
 
     return(

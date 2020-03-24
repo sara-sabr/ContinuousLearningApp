@@ -1,11 +1,9 @@
 import React from "react"
-import {Navigation} from "../components/organisms/Navigation"
+import {PageWrapper } from "../components/organisms/pageWrapper"
 
 
 export function Links(props){
     return(
-        <div className="container">
-            <Navigation icon="link" page="Links" />
-        </div>
+        <PageWrapper icon="link" page="Links"></PageWrapper>
     )
 }

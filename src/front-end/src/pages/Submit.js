@@ -1,154 +1,123 @@
-import React, { useState } from "react"
-import {Navigation} from "../components/organisms/Navigation"
-import {useSelector, useDispatch, shallowEqual} from "react-redux"
+import React from "react"
+import {PageWrapper} from "../components/organisms/pageWrapper"
+import {LinkMetadataForm} from "../components/organisms/LinkMetadataForm"
+import {LinkForm} from "../components/organisms/LinkForm"
+import {useSelector, shallowEqual} from "react-redux"
 import {useTranslation} from "react-i18next"
-import { FormControl, FormLabel, Input, Icon, Box, Heading, Text, Button, InputLeftElement, InputGroup, FormHelperText} from "@chakra-ui/core"
-import validator from "validator"
-
-
+import { Heading, Text, Spinner } from "@chakra-ui/core"
+import {INVALID_LINK_TYPES } from "../redux/actions"
 
 export function Submit(props){
     const [t] = useTranslation()
-    const dispatcher = useDispatch()
     const validLink = useSelector(state => state.submit.validLink)
+    const invalidLinkReason = useSelector(state => state.submit.invalidLinkReason)
     const link = useSelector(state => state.submit.link)
-    const [isValidFormat, setIsValidFormat] = useState(validLink)
-    const [linkValue, setLinkValue] = useState(link)
     const linkData = useSelector(state => state.submit.linkData, shallowEqual)
     const isFetchingMetadata = useSelector(state => state.submit.isFetchingMetadata)
     const fetchMetadataFailed = useSelector(state => state.submit.fetchMetadataFailed)
+    
+    if (isFetchingMetadata){
+        return (
+            <PageWrapper icon= "submit" page="Submit" centered={true}>
+                <Heading
+                    as="h2"
+                    p="10px"
+                    textAlign={[
+                        "center",
+                        "start"
+                    ]}
+                    fontSize={
+                        [
+                            "lg",
+                            "lg",
+                            "2xl",
+                            "3xl"
+                        ]
+                    }
+                >
+                   {t("fetching metadata")}
+                </Heading>
+                <Spinner 
+                    mt="15px"
+                    size = "40"
+                    thickness="5px"
+                >
 
-
-    let linkOnChangeHandler = function(e){
-        let value = e.target.value
-        setIsValidFormat(
-            validator.isURL(
-                value,
-                {
-                    require_protocol: true,
-                    require_valid_protocol: true,
-                    protocols: ["http", "https"],
-                    require_host: true,
-                    require_tld: true
-                }
-            )
+                </Spinner>
+            </PageWrapper>         
         )
-        setLinkValue(value)
     }
 
-    return (
-        <div className="container">
-            <Navigation icon="submit" page="Submit"/>
-            <Box display="flex" 
-                 width="100%" 
-                 height="100%"
-                 flexDirection="column" 
-                 justifyContent="center"
-                 alignItems="center" 
-                 mt="-65px"
-            >
-                    <Heading as="h2">
-                        {t("Add a link 🎉")}
-                    </Heading>
-                    <Text width={[
-                        "100%",
-                        "80%",
-                        "70%",
-                        "50%"
-                        ]}
-                        mt="10px"
-                        mb="10px"
-                        fontSize={
-                            [
-                                "sm",
-                                "md",
-                                "lg",
-                                "xl"
-                            ]
-                        }
-                        p={[
+    else if (fetchMetadataFailed || linkData.url !== ""){
+        return(
+            <PageWrapper icon ="submit" page="Submit" centered={true}>
+                <LinkMetadataForm data={linkData} />
+            </PageWrapper>
+        )
+    }
+
+    else if(( link === "" )|| 
+        ( !validLink && 
+            ( 
+                !invalidLinkReason ||
+                invalidLinkReason 
+                === 
+                INVALID_LINK_TYPES.BAD_FORMAT ||
+                invalidLinkReason
+                ===
+                INVALID_LINK_TYPES.LINK_ERROR ||
+                invalidLinkReason
+                ===
+                INVALID_LINK_TYPES.DOES_NOT_EXIST     
+            )
+        )
+    ){
+        return (
+            <PageWrapper icon= "submit" page="Submit" centered={true}>
+                <Heading as="h2">
+                    {t("Add a link 🎉")}
+                </Heading>
+                <Text width={
+                        [
+                            "100%",
+                            "80%",
+                            "70%",
+                            "50%"
+                        ]
+                    }
+                    mt="5px"
+                    mb="5px"
+                    fontSize={
+                        [
+                            "sm",
+                            "md",
+                            "lg",
+                            "xl"
+                        ]
+                    }
+                    p={
+                        [
                             2,
                             0
-                        ]}
-                    >
-                        {t("link explanation")}
-                    </Text>
-                <FormControl 
+                        ]
+                    }
+                >
+                    {t("link explanation")}
+                </Text>
+                <LinkForm 
+                    link = {link} 
+                    isValid={validLink}
+                    invalidLinkReason={invalidLinkReason}
                     width={[
                         "100%",
                         "80%",
                         "70%",
                         "50%"
                     ]}
-                    p = {
-                       [
-                           2,
-                           0
-                       ]
-                   }
-                >
-                    <FormLabel htmlFor="link">{t("Link")}</FormLabel>
-                    <InputGroup>
-                        <InputLeftElement 
-                            bg= "gray.700" 
-                            color= "white"
-                            borderRadius="4px 0px 0px 4px" 
-                            children={<Icon name = "link"></Icon>}
-                        />
-                        <Input
-                            isRequired={true}
-                            isInvalid={linkValue === "" ? false : !isValidFormat} 
-                            onChange={linkOnChangeHandler}
-                            value={linkValue} 
-                            type="url"
-                            placeholder={t("yourawesomelink")} 
-                            id = "link" 
-                            aria-label = {t("insert your link here")}
-                        >
-                        </Input>
-                    </InputGroup>
-                    {
-                        isValidFormat? 
-                        undefined
-                        :
-                        <FormHelperText id="link-helper-text">
-                            {t("link help")}
-                        </FormHelperText>
-                    }
-                    <Box
-                        mt ="5px"
-                        display={[
-                            "flex",
-                            "flex",
-                            "block",
-                            "block"
-                        ]}
-                        justifyContent={
-                            [
-                                "flex-end",
-                                "flex-end",
-                                undefined,
-                                undefined
-                            ]
-                        } 
-                    >
-                        <Button
-                            isDisabled={!isValidFormat} 
-                            width="100px"
-                            bg="gray.700"
-                            leftIcon="add"
-                            _hover={{
-                                bg: "gray.600"
-                            }}
-                            color="white"
-                        >
-                            {t("Next")}
-                        </Button>
-                    </Box>
-                    
-                </FormControl>
-            </Box>
-            
-        </div>
-    )
+                    switchButtonOnMobile={true}
+                />
+            </PageWrapper>
+                
+        )
+    }
 }
