@@ -6,7 +6,7 @@ The IT Strategy team at ESDC is currently developing a continuous learning strat
 
 ## Problem Statement ⚙️
 
-We are requiring teams to spend 20% of their time for learning and continuous improvement. It is the managers responsibility to report on what the team has learned and improved. Currently, if the strategy were to role out, this would mean manual tracking and reporting which creates additional burdens on teams taking away from learning and discouraging from adopting the strategy. We have created a CATS code for continuous learning however, it does not allow for insight on the actual learning and improvement
+We are requiring teams to spend 20% of their time for learning and continuous improvement. It is the managers responsibility to report on what the team has learned and improved. Currently, if the strategy were to roll out, this would mean manual tracking and reporting which creates additional burdens on teams taking away from learning and discouraging from adopting the strategy. We have created a CATS code for continuous learning; however, it does not allow for insight on the actual learning and improvement.
 
 
 ## Why This Repository Exists 🤷‍♂️
